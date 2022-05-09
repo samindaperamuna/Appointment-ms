@@ -1,6 +1,5 @@
 package ms.asp.appointment.mappers;
 
-import java.util.Objects;
 import java.util.Set;
 import ms.asp.appointment.domain.CodeableConcept;
 import ms.asp.appointment.models.CodeableConceptModel;
@@ -14,13 +13,13 @@ public interface CodeableMapper extends BaseMapper<CodeableConcept, CodeableConc
   Set<CodeableConcept> map(Set<String> display);
 
 
-  @Mapping(target = "version", ignore = true)
-  @Mapping(target = "system", ignore = true)
-  @Mapping(target = "publicId", ignore = true)
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "code", ignore = true)
-  @Mapping(target = "display")
-  CodeableConcept map(String display);
+
+ default CodeableConcept map(String display){
+
+   var codeableConcept = new CodeableConcept();
+   codeableConcept.setDisplay(display);
+   return codeableConcept;
+ }
 
   String map(CodeableConcept display);
 

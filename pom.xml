@@ -15,6 +15,7 @@
   <name>appointment</name>
   <description>Demo project for Spring Boot</description>
   <properties>
+    <version.hapi.fhir>5.5.1</version.hapi.fhir>
     <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
     <java.version>11</java.version>
   </properties>
@@ -106,6 +107,31 @@
       <version>${org.mapstruct.version}</version>
       <optional>true</optional>
     </dependency>
+
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
+      <version>${version.hapi.fhir}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>org.hl7.fhir.dstu2</artifactId>
+      <version>${version.hapi.fhir}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-base</artifactId>
+      <version>${version.hapi.fhir}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-client</artifactId>
+      <version>${version.hapi.fhir}</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -132,9 +158,19 @@
           <target>${java.version}</target> <!-- depending on your project -->
           <annotationProcessorPaths>
             <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+            <path>
               <groupId>org.mapstruct</groupId>
               <artifactId>mapstruct-processor</artifactId>
               <version>${org.mapstruct.version}</version>
+            </path>
+            <path>
+              <groupId>lombok</groupId>
+              <artifactId>lombok-mapstruct-binding</artifactId>
+              <version>0.2.0</version>
             </path>
             <!-- other annotation processors -->
           </annotationProcessorPaths>
