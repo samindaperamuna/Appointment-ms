@@ -1,0 +1,12 @@
+server.port: 8080
+
+spring:
+  webflux.base-path: /api/v1/
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/appointment_ms_test
+    username: spring-reactive-user-test
+    password: 61@FfuCA5Z]UiXUu
+  liquibase:
+    change-log: db/changelog/test-changelog.yml
+    enabled: true
+    contexts: test

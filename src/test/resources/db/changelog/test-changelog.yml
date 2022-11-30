@@ -1,0 +1,11 @@
+databaseChangeLog:
+- preConditions:
+  - onFail: HALT
+  - sqlCheck:
+      expectedResult: 1
+      sql: SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = 'appointment_ms_test'
+- preConditions:
+  - onFail: HALT
+  - dbms.type: mysql
+- include:
+    file: db/changelog/init-db.yml
