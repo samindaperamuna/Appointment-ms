@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 public class Appointment extends AuditedEntity {
 
     private String status;
-    private String cancellationReason;
+    private CancellationReason cancellationReason;
     private int priority;
     private String description;
     private String supportingInformation;
@@ -50,6 +50,6 @@ public class Appointment extends AuditedEntity {
     private Set<Participant> participants;
 
     @Transient
-    private Period requestedPeriod;
+    private Period period;
     private Long periodId;
 }

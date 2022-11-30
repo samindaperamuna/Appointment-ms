@@ -35,10 +35,10 @@ public class RouterConfig {
 		.andRoute(GET("/appointments/{publicId}/history"), appointmentHandler::history)
 		
 		// ServiceProvider
-		.andRoute(GET("/appointments"), serviceProviderHandler::all)
-		.andRoute(GET("/appointments/{publicId}"), serviceProviderHandler::byPublicId)
-		.andRoute(POST("/appointments"), serviceProviderHandler::create)
-		.andRoute(PUT("/appointments"), serviceProviderHandler::update)
-		.andRoute(DELETE("/appointments/{publicId}"), serviceProviderHandler::delete);
+		.andRoute(GET("/serviceproviders"), serviceProviderHandler::all)
+		.andRoute(GET("/serviceproviders/{publicId}"), serviceProviderHandler::byPublicId)
+		.andRoute(POST("/serviceproviders"), serviceProviderHandler::create)
+		.andRoute(PUT("/serviceproviders"), serviceProviderHandler::update)
+		.andRoute(DELETE("/serviceproviders/{publicId}"), serviceProviderHandler::delete);
     }
 }

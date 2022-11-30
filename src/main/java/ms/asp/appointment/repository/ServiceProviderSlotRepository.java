@@ -39,6 +39,13 @@ public class ServiceProviderSlotRepository {
 	    + " (SERVICE_PROVIDER_ID, SLOT_ID)"
 	    + " VALUES (:providerId, :slotId)";
 
+    private final String PROVIDER_SLOT_UPDATE_SQL = "UPDATE SERVICE_PROVIDER_SLOT"
+	    + " SET SERVICE_PROVIDER_ID=:providerId, SLOT_ID=:slotId"
+	    + " WHERE (ID=:id)";
+
+    private final String PROVIDER_SLOT_DELETE_SQL = "DELETE FROM SERVICE_PROVIDER_SLOT"
+	    + " WHERE SERVICE_PROVIDER_ID=:providerId AND SLOT_ID=:slotId";
+
     private final String AM_SLOT_SQL = "SELECT s.* FROM SERVICE_PROVIDER_SLOT as sps"
 	    + " INNER JOIN SERVICE_PROVIDER as sp ON sps.SERVICE_PROVIDER_ID = sp.ID"
 	    + " INNER JOIN SLOT as s ON sps.SLOT_ID = s.ID"
@@ -52,6 +59,22 @@ public class ServiceProviderSlotRepository {
 		.fetch()
 		.first()
 		.map(r -> (Long) r.get("ID"));
+    }
+
+    public Mono<Integer> updateServiceProviderSlot(ServiceProvider provider, Slot slot) {
+	return databaseClient.sql(PROVIDER_SLOT_UPDATE_SQL)
+		.bind("providerId", provider.getId())
+		.bind("slotId", slot.getId())
+		.fetch()
+		.rowsUpdated();
+    }
+
+    public Mono<Integer> deleteServiceProviderSlot(ServiceProvider provider, Slot slot) {
+	return databaseClient.sql(PROVIDER_SLOT_DELETE_SQL)
+		.bind("providerId", provider.getId())
+		.bind("slotIdd", slot.getId())
+		.fetch()
+		.rowsUpdated();
     }
 
     public Flux<Slot> findAMSlots(ServiceProvider provider, LocalDate date, int fetchSize) {

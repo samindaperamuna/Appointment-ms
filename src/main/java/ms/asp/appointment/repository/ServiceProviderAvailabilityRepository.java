@@ -35,15 +35,15 @@ public class ServiceProviderAvailabilityRepository {
 	    + " VALUES (:providerId, :availabilityId)";
 
     private final String PROVIDER_AVAILABILITY_UPDATE_SQL = "UPDATE SERVICE_PROVIDER_AVAILABILITY"
-	    + " SET SERVICE_PROVIDER_ID=:providerId, AVAILABILITY_ID:availabilityId"
+	    + " SET SERVICE_PROVIDER_ID=:providerId, AVAILABILITY_ID=:availabilityId"
 	    + " WHERE (ID=:id)";
 
     private final String PROVIDER_AVAILABILITY_DELETE_SQL = "DELETE FROM SERVICE_PROVIDER_AVAILABILITY"
-	    + " WHERE (SERVICE_PROVIDER_ID=:providerId AND ID=:id)";
+	    + " WHERE (SERVICE_PROVIDER_ID=:providerId AND AVAILABILITY_ID=:availabilityId)";
 
     private final String PROVIDER_AVAILABILITY_SELECT_SQL = "SELECT a.* FROM SERVICE_PROVIDER_AVAILABILITY as spa"
 	    + " INNER JOIN SERVICE_PROVIDER as sp ON spa.SERVICE_PROVIDER_ID = sp.ID"
-	    + " INNER JOIN AVAILABILITY as a ON sps.AVAILABILITY_ID = a.ID"
+	    + " INNER JOIN AVAILABILITY as a ON sps.AVAILABILITY_ID=a.ID"
 	    + " WHERE spa.SERVICE_PROVIDER_ID LIKE :id";
 
     public Mono<Long> saveServiceProviderAvailability(ServiceProvider provider, Availability availability) {
@@ -64,10 +64,10 @@ public class ServiceProviderAvailabilityRepository {
 		.rowsUpdated();
     }
 
-    public Mono<Integer> deleteServiceProviderAvailability(ServiceProvider provider, Long id) {
+    public Mono<Integer> deleteServiceProviderAvailability(ServiceProvider provider, Availability availability) {
 	return databaseClient.sql(PROVIDER_AVAILABILITY_DELETE_SQL)
 		.bind("providerId", provider.getId())
-		.bind("id", id)
+		.bind("availabilityId", availability.getId())
 		.fetch()
 		.rowsUpdated();
     }

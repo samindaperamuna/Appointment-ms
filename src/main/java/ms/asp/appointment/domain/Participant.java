@@ -13,14 +13,17 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class Participant extends BaseEntity {
 
-    public String type;
-    public boolean required;
-    public String status;
+    private String type;
+    private boolean required;
+    private String status;
 
     @Transient
-    public Period period;
+    private Appointment appointment;
+    private Long appointmentId;
+
     @Transient
-    public ParticipantInfo participantInfo;
+    private ParticipantInfo participantInfo;
+    private Long participantInfoId;
 
     @Override
     public String toString() {

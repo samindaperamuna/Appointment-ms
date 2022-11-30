@@ -25,3 +25,9 @@ databaseChangeLog:
         - column:
             name: STATUS
             type: VARCHAR(50)
+        - column:
+            name: APPOINTMENT_ID
+            type: LONG
+        - column:
+            name: PARTICIPANT_INFO_ID
+            type: LONG

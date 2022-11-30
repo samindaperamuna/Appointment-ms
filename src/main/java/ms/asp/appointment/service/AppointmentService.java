@@ -15,8 +15,14 @@ import ms.asp.appointment.mapper.AppointmentMapper;
 import ms.asp.appointment.model.AppointmentModel;
 import ms.asp.appointment.model.PeriodModel;
 import ms.asp.appointment.repository.AppointmentHistoryRepository;
+import ms.asp.appointment.repository.AppointmentNoteRepository;
 import ms.asp.appointment.repository.AppointmentRepository;
+import ms.asp.appointment.repository.AppointmentSlotRepository;
 import ms.asp.appointment.repository.BaseRepository;
+import ms.asp.appointment.repository.NoteRepository;
+import ms.asp.appointment.repository.ParticipantRepository;
+import ms.asp.appointment.repository.PeriodRepository;
+import ms.asp.appointment.repository.SlotRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -25,6 +31,12 @@ import reactor.core.publisher.Mono;
 public class AppointmentService extends AbstractService<Appointment, Long, AppointmentModel> {
 
     private final AppointmentHistoryRepository historyRepository;
+    private final NoteRepository noteRepository;
+    private final AppointmentNoteRepository appointmentNoteRepository;
+    private final ParticipantRepository participantRepository;
+    private final SlotRepository slotRepository;
+    private final AppointmentSlotRepository appoinmentSlotRepository;
+    private final PeriodRepository periodRepository;
 
     /**
      * Pass in the repository and the mapper to the super class.
@@ -33,11 +45,25 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      * @param historyRepository
      * @param mapper            Implementation of {@link Mapper} to pass to the super class/
      */
-    public AppointmentService(AppointmentRepository repository, AppointmentHistoryRepository historyRepository,
+    public AppointmentService(AppointmentRepository repository,
+	    AppointmentHistoryRepository historyRepository,
+	    NoteRepository noteRepository,
+	    AppointmentNoteRepository appoinmentNoteRepository,
+	    ParticipantRepository participantRepository,
+	    SlotRepository slotRepository,
+	    AppointmentSlotRepository appoinmentSlotRepository,
+	    PeriodRepository periodRepository,
 	    AppointmentMapper mapper) {
+
 	super(repository, mapper);
 
 	this.historyRepository = historyRepository;
+	this.noteRepository = noteRepository;
+	this.appointmentNoteRepository = appoinmentNoteRepository;
+	this.participantRepository = participantRepository;
+	this.slotRepository = slotRepository;
+	this.appoinmentSlotRepository = appoinmentSlotRepository;
+	this.periodRepository = periodRepository;
     }
 
     public Mono<AppointmentModel> create(AppointmentModel model) {
@@ -112,7 +138,41 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      * @return
      */
     private Mono<AppointmentModel> save(Appointment appointment) {
-	return ((AppointmentRepository) repository).save(appointment)
+	return repository.save(appointment)
+		.flatMap(a -> {
+		    Mono.just(a.getParticipants())
+			    .flatMapMany(Flux::fromIterable)
+			    .map(p -> {
+				p.setAppointmentId(a.getId());
+
+				return p;
+			    }).flatMap(p -> participantRepository.save(p));
+
+		    return Mono.just(a);
+		})
+		.flatMap(a -> {
+		    Mono.just(a.getSlots())
+			    .flatMapMany(Flux::fromIterable)
+			    .flatMap(s -> slotRepository.save(s))
+			    .flatMap(s -> appoinmentSlotRepository.saveAppointmentSlot(a, s));
+
+		    return Mono.just(a);
+		})
+		.flatMap(a -> {
+		    Mono.just(a.getNotes())
+			    .flatMapMany(Flux::fromIterable)
+			    .flatMap(n -> noteRepository.save(n))
+			    .flatMap(n -> appointmentNoteRepository.saveAppointmentNote(a, n));
+
+		    return Mono.just(a);
+		})
+		.flatMap(a -> periodRepository.save(a.getPeriod())
+			.map(p -> {
+			    a.setPeriodId(p.getId());
+
+			    return a;
+			}))
+		.flatMap(a -> repository.save(a))
 		.map(mapper::toModel);
     }
 
@@ -128,7 +188,6 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	historyRepository.save(((AppointmentMapper) mapper).toHistory(appointment))
 		.subscribe();
 
-	return repository.save(appointment)
-		.map(mapper::toModel);
+	return save(appointment);
     }
 }

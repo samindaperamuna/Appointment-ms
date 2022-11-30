@@ -19,3 +19,6 @@ databaseChangeLog:
         - column:
             name: NAME
             type: VARCHAR(100)
+        - column:
+            name: CONTACT_ID
+            type: LONG

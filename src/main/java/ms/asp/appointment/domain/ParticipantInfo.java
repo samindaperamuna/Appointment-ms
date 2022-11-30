@@ -1,7 +1,5 @@
 package ms.asp.appointment.domain;
 
-import java.util.Set;
-
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -16,7 +14,8 @@ public class ParticipantInfo extends BaseEntity {
     private String name;
 
     @Transient
-    private Set<Contact> contacts;
+    private Contact contacts;
+    private Long contactId;
 
     @Override
     public String toString() {

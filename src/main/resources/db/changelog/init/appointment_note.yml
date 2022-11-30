@@ -4,7 +4,7 @@ databaseChangeLog:
     author: sam
     changes:
     - createTable:
-        tableName: APPOINTMENT_PARTICIPANT
+        tableName: APPOINTMENT_NOTE
         columns:
         - column:
             name: ID
@@ -17,5 +17,5 @@ databaseChangeLog:
             name: APPOINTMENT_ID
             type: INT
         - column:
-            name: PARTICIPANT_ID
+            name: NOTE_ID
             type: INT

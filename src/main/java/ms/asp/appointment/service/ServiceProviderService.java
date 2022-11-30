@@ -73,10 +73,42 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
     public Mono<ServiceProviderModel> delete(String publicId) {
 	var e = new NotFoundException("No ServiceProvider has id = " + publicId);
 
-	// TODO: Compose delete reactive chain
-	return repository.deleteByPublicId(publicId)
+	repository.findByPublicId(publicId)
 		.switchIfEmpty(Mono.error(e))
-		.map(mapper::toModel);
+		.flatMap(p -> contactRepository.deleteById(p.getContactId())
+			.onErrorStop()
+			.then(Mono.just(p)))
+		.flatMap(p -> {
+		    Set<Slot> slots = new HashSet<>(p.getAmSlots());
+		    slots.addAll(p.getPmSlots());
+
+		    Mono.just(slots)
+			    .flatMapMany(Flux::fromIterable)
+			    .flatMap(s -> {
+				providerSlotRepository.deleteServiceProviderSlot(p, s);
+
+				return Mono.just(s);
+			    })
+			    .flatMap(s -> slotRepository.delete(s));
+
+		    return Mono.just(p);
+		}).flatMap(p -> {
+		    Mono.just(p.getAvailabilty())
+			    .flatMapMany(Flux::fromIterable)
+			    .flatMap(a -> {
+				providerAvailabilityRepository.deleteServiceProviderAvailability(p, a);
+
+				return Mono.just(a);
+			    }).flatMap(a -> availabilityRepository.delete(a));
+
+		    return Mono.just(p);
+		}).flatMap(p -> {
+		    repository.delete(p);
+
+		    return Mono.just(p);
+		}).map(mapper::toModel);
+
+	return null;
     }
 
     /**
@@ -98,25 +130,21 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		    serviceProvider.setServiceTypesJSON(JSONUtils.objectToJSON(serviceProvider.getServiceTypes()));
 
 		    return serviceProvider;
-		}).map(p -> {
+		}).flatMap(p -> repository.save(p))
+		.flatMap(p -> {
 		    Mono.just(slots)
 			    .flatMapMany(Flux::fromIterable)
 			    .flatMap(slot -> slotRepository.save(slot))
-			    .flatMap(slot -> providerSlotRepository.saveServiceProviderSlot(serviceProvider, slot))
-			    .subscribe();
+			    .flatMap(slot -> providerSlotRepository.saveServiceProviderSlot(p, slot));
 
-		    return p;
-		}).map(p -> {
+		    return Mono.just(p);
+		}).flatMap(p -> {
 		    Mono.just(p.getAvailabilty())
 			    .flatMapMany(Flux::fromIterable)
 			    .flatMap(a -> availabilityRepository.save(a))
-			    .map(a -> providerAvailabilityRepository
-				    .saveServiceProviderAvailability(p, a)
-				    .subscribe());
+			    .flatMap(a -> providerAvailabilityRepository.saveServiceProviderAvailability(p, a));
 
-		    return p;
-		}).flatMap(p -> repository.save(p))
-		.map(mapper::toModel);
-
+		    return Mono.just(p);
+		}).map(mapper::toModel);
     }
 }

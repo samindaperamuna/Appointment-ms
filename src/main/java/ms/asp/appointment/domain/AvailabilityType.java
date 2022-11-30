@@ -1,5 +1,8 @@
 package ms.asp.appointment.domain;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,4 +16,10 @@ public enum AvailabilityType {
     OTHER("other");
 
     private final String value;
+
+    public static Optional<AvailabilityType> get(String value) {
+	return Arrays.stream(AvailabilityType.values())
+		.filter(env -> env.value.equals(value))
+		.findFirst();
+    }
 }

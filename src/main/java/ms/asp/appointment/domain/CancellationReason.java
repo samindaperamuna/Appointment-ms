@@ -1,5 +1,8 @@
 package ms.asp.appointment.domain;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -24,4 +27,10 @@ public enum CancellationReason {
     Weather("oth-weath");
 
     private final String value;
+
+    public static Optional<CancellationReason> get(String value) {
+	return Arrays.stream(CancellationReason.values())
+		.filter(env -> env.value.equals(value))
+		.findFirst();
+    }
 }
