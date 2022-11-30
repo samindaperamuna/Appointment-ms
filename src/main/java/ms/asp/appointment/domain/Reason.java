@@ -1,10 +1,7 @@
 package ms.asp.appointment.domain;
 
-import javax.persistence.Entity;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.RelationTargetAuditMode;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
-@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-public class Reason extends CodeableConcept{
+@Table("REASON")
+public class Reason extends CodeableConcept {
 }

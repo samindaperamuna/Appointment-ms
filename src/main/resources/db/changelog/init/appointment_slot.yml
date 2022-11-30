@@ -1,0 +1,21 @@
+databaseChangeLog:
+- changeSet:
+    id: '1'
+    author: sam
+    changes:
+    - createTable:
+        tableName: APPOINTMENT_SLOT
+        columns:
+        - column:
+            name: ID
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: APPOINTMENT_ID
+            type: INT
+        - column:
+            name: SLOT_ID
+            type: INT

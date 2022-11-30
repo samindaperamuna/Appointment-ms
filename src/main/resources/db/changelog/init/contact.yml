@@ -1,0 +1,27 @@
+databaseChangeLog:
+- changeSet:
+    id: '1'
+    author: sam
+    changes:
+    - createTable:
+        tableName: CONTACT
+        columns:
+        - column:
+            name: ID
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: PUBLIC_ID
+            type: VARCHAR(50)
+        - column:
+            name: LOCATION
+            type: VARCHAR(500)
+        - column:
+            name: TELEPHONE
+            type: VARCHAR(50)
+        - column:
+            name: EMAIL
+            type: VARCHAR(50)

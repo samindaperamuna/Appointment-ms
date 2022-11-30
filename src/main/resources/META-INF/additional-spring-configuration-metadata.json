@@ -1,0 +1,47 @@
+{"properties": [
+  {
+    "name": "service.base-url",
+    "type": "java.lang.String",
+    "description": "A description for 'service.base-url'"
+  },
+  {
+    "name": "service.idTemplate",
+    "type": "java.lang.String",
+    "description": "A description for 'service.idTemplate'"
+  },
+  {
+    "name": "service.endpoints.all",
+    "type": "java.lang.String",
+    "description": "A description for 'service.endpoints.all'"
+  },
+  {
+    "name": "service.endpoints.byId",
+    "type": "java.lang.String",
+    "description": "A description for 'service.endpoints.byId'"
+  },
+  {
+    "name": "service.endpoints.create",
+    "type": "java.lang.String",
+    "description": "A description for 'service.endpoints.create'"
+  },
+  {
+    "name": "service.endpoints.update",
+    "type": "java.lang.String",
+    "description": "A description for 'service.endpoints.update'"
+  },
+  {
+    "name": "service.endpoints.delete",
+    "type": "java.lang.String",
+    "description": "A description for 'service.endpoints.delete'"
+  },
+  {
+    "name": "service.endpoints.reschedule",
+    "type": "java.lang.String",
+    "description": "A description for 'service.endpoints.reschedule'"
+  },
+  {
+    "name": "service.endpoints.history",
+    "type": "java.lang.String",
+    "description": "A description for 'service.endpoints.history'"
+  }
+]}

@@ -1,25 +1,23 @@
 package ms.asp.appointment.domain;
 
 import java.util.Set;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import lombok.AllArgsConstructor;
+
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Table;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.RequiredArgsConstructor;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-@RequiredArgsConstructor
-@AllArgsConstructor
-@Entity
+@Table("SCHEDULE")
+@EqualsAndHashCode(callSuper = true)
 public class Schedule extends BaseEntity {
-  private boolean active;
 
-  @OneToMany
-  private Set<ParticipantInfo> participantInfo;
-  @OneToOne
-  private Period planningHorizon;
-  private String comment;
+    private boolean active;
+    private String comment;
+
+    @Transient
+    private Set<ParticipantInfo> participantInfo;
+    @Transient
+    private Period planningHorizon;
 }

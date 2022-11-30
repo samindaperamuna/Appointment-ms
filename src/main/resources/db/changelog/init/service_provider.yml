@@ -1,0 +1,63 @@
+databaseChangeLog:
+- changeSet:
+    id: '1'
+    author: sam
+    changes:
+    - createTable:
+        tableName: SERVICE_PROVIDER
+        columns:
+        - column:
+            name: ID
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: PUBLIC_ID
+            type: VARCHAR(50)
+        - column:
+            name: SUB_TITLE
+            type: VARCHAR(100)
+        - column:
+            name: LOCATION
+            type: VARCHAR(500)
+        - column:
+            name: SERVICE_TYPES_JSON
+            type: JSON
+        - column:
+            name: CONTACT_ID
+            type: INT
+        - column:
+            name: PRICE
+            type: CURRENCY         
+        - column:
+            name: START
+            type: DATETIME
+        - column:
+            name: END
+            type: DATETIME
+        - column:
+            name: FULL_DAY_RESERVATION
+            type: BOOLEAN         
+        - column:
+            name: ORDERS_PER_DAY_SLOT
+            type: INT
+        - column:
+            name: OFF_DAYS_JSON
+            type: JSON
+        - column:
+            name: HAS_DESCRIPTION
+            type: BOOLEAN
+        - column:
+            name: IS_ACTIVE
+            type: BOOLEAN
+        - column:
+            name: CREATED
+            type: DATE
+        - column:
+            name: MODIFIED
+            type: DATE
+        - column:
+            name: VERSION
+            type: INT

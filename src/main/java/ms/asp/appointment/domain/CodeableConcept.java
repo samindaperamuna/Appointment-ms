@@ -1,26 +1,20 @@
 package ms.asp.appointment.domain;
 
+import org.springframework.data.relational.core.mapping.Table;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import org.hibernate.envers.Audited;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-@NoArgsConstructor
-@Audited
-@Entity
-@Table(name="CODEABLE_CONCEPT")
+@Table("CODEABLE_CONCEPT")
+@EqualsAndHashCode(callSuper = true)
 public class CodeableConcept extends BaseEntity {
 
-  private String system;
-  private String code;
-  private String display;
+    private String system;
+    private String code;
+    private String display;
 
-  public String toString(){
-    return display;
-  }
+    public String toString() {
+	return display;
+    }
 }

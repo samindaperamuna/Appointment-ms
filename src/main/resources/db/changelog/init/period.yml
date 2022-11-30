@@ -1,0 +1,24 @@
+databaseChangeLog:
+- changeSet:
+    id: '1'
+    author: sam
+    changes:
+    - createTable:
+        tableName: PERIOD
+        columns:
+        - column:
+            name: ID
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: PUBLIC_ID
+            type: VARCHAR(50)
+        - column:
+            name: START
+            type: DATETIME
+        - column:
+            name: END
+            type: DATETIME

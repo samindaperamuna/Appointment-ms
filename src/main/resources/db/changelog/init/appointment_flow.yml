@@ -1,0 +1,24 @@
+databaseChangeLog:
+- changeSet:
+    id: '1'
+    author: sam
+    changes:
+    - createTable:
+        tableName: APPOINTMENT_FLOW
+        columns:
+        - column:
+            name: ID
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: PUBLIC_ID
+            type: VARCHAR(50)
+        - column:
+            name: SERVICE_TYPE_JSON
+            type: JSON
+        - column:
+            name: APPOINTMENT_TYPE_JSON
+            type: JSON

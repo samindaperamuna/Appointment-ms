@@ -1,29 +1,25 @@
 package ms.asp.appointment.domain;
 
 import java.util.Set;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Table;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import org.hibernate.envers.Audited;
-import org.hibernate.envers.RelationTargetAuditMode;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-@NoArgsConstructor
-@Entity
-@Table(name="PARTICIPANT_INFO")
-@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
-public class ParticipantInfo extends BaseEntity{
+@Table("PARTICIPANT_INFO")
+@EqualsAndHashCode(callSuper = true)
+public class ParticipantInfo extends BaseEntity {
 
-  private String name;
-  @OneToMany
-  private Set<Contact> contacts;
+    private String name;
 
-  @Override
-  public String toString(){
-    return name;
-  }
+    @Transient
+    private Set<Contact> contacts;
+
+    @Override
+    public String toString() {
+	return name;
+    }
 }

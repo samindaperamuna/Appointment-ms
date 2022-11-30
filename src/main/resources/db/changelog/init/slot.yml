@@ -1,0 +1,36 @@
+databaseChangeLog:
+- changeSet:
+    id: '1'
+    author: sam
+    changes:
+    - createTable:
+        tableName: SLOT
+        columns:
+        - column:
+            name: ID
+            type: INT
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+              nullable: false
+        - column:
+            name: PUBLIC_ID
+            type: VARCHAR(50)
+        - column:
+            name: STATUS
+            type: VARCHAR(50)
+        - column:
+            name: START
+            type: DATETIME
+        - column:
+            name: END
+            type: DATETIME         
+        - column:
+            name: OVERBOOKED
+            type: BOOLEAN
+        - column:
+            name: SCHEDULE_ID
+            type: INT
+        - column:
+            name: COMMENT
+            type: VARCHAR(500)
