@@ -1,4 +1,4 @@
-package ms.asp.appointment.exception;
+package ms.asp.appointment.config.exception;
 
 import java.util.Map;
 
@@ -18,6 +18,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import lombok.extern.slf4j.Slf4j;
+import ms.asp.appointment.exception.ErrorResponse;
 import reactor.core.publisher.Mono;
 
 @Slf4j

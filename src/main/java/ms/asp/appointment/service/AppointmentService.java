@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import ms.asp.appointment.domain.Appointment;
 import ms.asp.appointment.domain.AppointmentHistory;
 import ms.asp.appointment.exception.NotFoundException;
@@ -28,6 +29,7 @@ import reactor.core.publisher.Mono;
 
 @Service
 @Transactional
+@Slf4j
 public class AppointmentService extends AbstractService<Appointment, Long, AppointmentModel> {
 
     private final AppointmentHistoryRepository historyRepository;
@@ -139,6 +141,11 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      */
     private Mono<AppointmentModel> save(Appointment appointment) {
 	return repository.save(appointment)
+		.onErrorComplete(e -> {
+		    log.error("Failed to save appointment: " + e.getLocalizedMessage());
+		    
+		    return false;
+		})
 		.flatMap(a -> {
 		    Mono.just(a.getParticipants())
 			    .flatMapMany(Flux::fromIterable)

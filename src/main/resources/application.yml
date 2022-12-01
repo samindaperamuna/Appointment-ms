@@ -1,6 +1,7 @@
 server.port: 8080
 
 spring:
+  application.name: appointment-ms
   webflux.base-path: /api/v1/
   r2dbc:
     url: r2dbc:mysql://localhost:3306/appointment_ms
@@ -8,4 +9,15 @@ spring:
     password: ywB[]8Caf87ECQK1
   liquibase:
     change-log: db/changelog/changelog.yml
+    enabled: true
+  reactor:
+    debug-agent:
+      enabled: true
+    
+logging:
+  level:
+    '[reactor.netty.http.client]': DEBUG
+    
+application:
+  reactive-logging-filter:
     enabled: true

@@ -5,12 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import ms.asp.appointment.domain.Appointment;
 import ms.asp.appointment.domain.AppointmentType;
