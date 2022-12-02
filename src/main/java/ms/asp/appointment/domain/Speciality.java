@@ -3,6 +3,8 @@ package ms.asp.appointment.domain;
 import java.util.Arrays;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 public enum Speciality {
     DEFAULT("default");
 
+    @JsonValue
     private final String value;
 
     public static Optional<Speciality> get(String value) {

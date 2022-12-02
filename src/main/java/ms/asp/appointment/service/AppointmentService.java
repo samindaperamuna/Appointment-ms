@@ -1,7 +1,5 @@
 package ms.asp.appointment.service;
 
-import static ms.asp.appointment.util.CommonUtils.generatePublicId;
-
 import javax.validation.Valid;
 
 import org.mapstruct.Mapper;
@@ -11,15 +9,20 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ms.asp.appointment.domain.Appointment;
 import ms.asp.appointment.domain.AppointmentHistory;
+import ms.asp.appointment.domain.Contact;
+import ms.asp.appointment.domain.ParticipantInfo;
+import ms.asp.appointment.exception.AppointmentException;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.mapper.AppointmentMapper;
 import ms.asp.appointment.model.AppointmentModel;
+import ms.asp.appointment.model.ParticipantInfoRepository;
 import ms.asp.appointment.model.PeriodModel;
 import ms.asp.appointment.repository.AppointmentHistoryRepository;
 import ms.asp.appointment.repository.AppointmentNoteRepository;
 import ms.asp.appointment.repository.AppointmentRepository;
 import ms.asp.appointment.repository.AppointmentSlotRepository;
 import ms.asp.appointment.repository.BaseRepository;
+import ms.asp.appointment.repository.ContactRepository;
 import ms.asp.appointment.repository.NoteRepository;
 import ms.asp.appointment.repository.ParticipantRepository;
 import ms.asp.appointment.repository.PeriodRepository;
@@ -36,6 +39,8 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
     private final NoteRepository noteRepository;
     private final AppointmentNoteRepository appointmentNoteRepository;
     private final ParticipantRepository participantRepository;
+    private final ParticipantInfoRepository participantInfoRepository;
+    private final ContactRepository contactRepository;
     private final SlotRepository slotRepository;
     private final AppointmentSlotRepository appoinmentSlotRepository;
     private final PeriodRepository periodRepository;
@@ -52,6 +57,8 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	    NoteRepository noteRepository,
 	    AppointmentNoteRepository appoinmentNoteRepository,
 	    ParticipantRepository participantRepository,
+	    ParticipantInfoRepository participantInfoRepository,
+	    ContactRepository contactRepository,
 	    SlotRepository slotRepository,
 	    AppointmentSlotRepository appoinmentSlotRepository,
 	    PeriodRepository periodRepository,
@@ -63,6 +70,8 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	this.noteRepository = noteRepository;
 	this.appointmentNoteRepository = appoinmentNoteRepository;
 	this.participantRepository = participantRepository;
+	this.participantInfoRepository = participantInfoRepository;
+	this.contactRepository = contactRepository;
 	this.slotRepository = slotRepository;
 	this.appoinmentSlotRepository = appoinmentSlotRepository;
 	this.periodRepository = periodRepository;
@@ -70,9 +79,8 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 
     public Mono<AppointmentModel> create(AppointmentModel model) {
 	var appointment = mapper.toEntity(model);
-	appointment.setPublicId(generatePublicId());
 
-	return save(appointment);
+	return save(appointment).log();
     }
 
     public Mono<AppointmentModel> update(AppointmentModel model) {
@@ -143,33 +151,83 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	return repository.save(appointment)
 		.onErrorComplete(e -> {
 		    log.error("Failed to save appointment: " + e.getLocalizedMessage());
-		    
+
 		    return false;
 		})
+		// Save participants
 		.flatMap(a -> {
+		    if (a.getParticipants() == null) {
+			return Mono.error(new AppointmentException("No participants are defined"));
+		    }
+
 		    Mono.just(a.getParticipants())
 			    .flatMapMany(Flux::fromIterable)
 			    .map(p -> {
 				p.setAppointmentId(a.getId());
 
 				return p;
-			    }).flatMap(p -> participantRepository.save(p));
+			    })
+			    // Save contact and set contact id
+			    .flatMap(p -> {
+				if (p.getParticipantInfo() != null && p.getParticipantInfo().getContact() != null) {
+				    Contact contact = p.getParticipantInfo().getContact();
+
+				    return contactRepository.save(contact)
+					    .map(c -> {
+						p.getParticipantInfo().setContactId(c.getId());
+
+						return p;
+					    });
+				}
+
+				return Mono.just(p);
+			    })
+			    // Save participant info and set participant id
+			    .flatMap(p -> {
+				if (p.getParticipantInfo() != null) {
+				    ParticipantInfo participantInfo = p.getParticipantInfo();
+
+				    return participantInfoRepository.save(participantInfo)
+					    .map(pi -> {
+						p.setParticipantInfoId(pi.getId());
+
+						return p;
+					    });
+				}
+
+				return Mono.just(p);
+			    })
+			    // Save participant
+			    .flatMap(p -> participantRepository.save(p))
+			    .subscribe();
 
 		    return Mono.just(a);
 		})
+		// Save slots
 		.flatMap(a -> {
+		    if (a.getSlots() == null) {
+			return Mono.error(new AppointmentException("No slots are defined"));
+		    }
+
 		    Mono.just(a.getSlots())
 			    .flatMapMany(Flux::fromIterable)
 			    .flatMap(s -> slotRepository.save(s))
-			    .flatMap(s -> appoinmentSlotRepository.saveAppointmentSlot(a, s));
+			    .flatMap(s -> appoinmentSlotRepository.saveAppointmentSlot(a, s))
+			    .subscribe();
 
 		    return Mono.just(a);
 		})
+		// Save notes
 		.flatMap(a -> {
+		    if (a.getNotes() == null) {
+			return Mono.empty();
+		    }
+
 		    Mono.just(a.getNotes())
 			    .flatMapMany(Flux::fromIterable)
 			    .flatMap(n -> noteRepository.save(n))
-			    .flatMap(n -> appointmentNoteRepository.saveAppointmentNote(a, n));
+			    .flatMap(n -> appointmentNoteRepository.saveAppointmentNote(a, n))
+			    .subscribe();
 
 		    return Mono.just(a);
 		})

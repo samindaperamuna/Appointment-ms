@@ -14,7 +14,7 @@ public class ParticipantInfo extends BaseEntity {
     private String name;
 
     @Transient
-    private Contact contacts;
+    private Contact contact;
     private Long contactId;
 
     @Override

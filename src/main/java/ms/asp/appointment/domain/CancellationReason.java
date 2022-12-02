@@ -3,6 +3,8 @@ package ms.asp.appointment.domain;
 import java.util.Arrays;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +28,7 @@ public enum CancellationReason {
     RoomResourceMaintenance("oth-room"), ScheduleOrderError("oth-oerr"), SilentWalkInError("oth-swie"),
     Weather("oth-weath");
 
+    @JsonValue
     private final String value;
 
     public static Optional<CancellationReason> get(String value) {

@@ -9,8 +9,14 @@ import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
+import ms.asp.appointment.domain.converter.AppointmentTypeReader;
+import ms.asp.appointment.domain.converter.AppointmentTypeWriter;
+import ms.asp.appointment.domain.converter.CancellationReasonReader;
+import ms.asp.appointment.domain.converter.CancellationReasonWriter;
 import ms.asp.appointment.domain.converter.ServiceCategoryReader;
 import ms.asp.appointment.domain.converter.ServiceCategoryWriter;
+import ms.asp.appointment.domain.converter.SpecialityReader;
+import ms.asp.appointment.domain.converter.SpecialityWriter;
 
 @Configuration
 @RequiredArgsConstructor
@@ -27,7 +33,13 @@ public class R2DBCConfig extends AbstractR2dbcConfiguration {
     @Override
     protected List<Object> getCustomConverters() {
 	return List.of(
+		new AppointmentTypeReader(),
+		new AppointmentTypeWriter(),
+		new CancellationReasonReader(),
+		new CancellationReasonWriter(),
 		new ServiceCategoryReader(),
-		new ServiceCategoryWriter());
+		new ServiceCategoryWriter(),
+		new SpecialityReader(),
+		new SpecialityWriter());
     }
 }

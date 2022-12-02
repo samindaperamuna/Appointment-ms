@@ -1,4 +1,4 @@
-package ms.asp.appointment.exception;
+package ms.asp.appointment.config.exception;
 
 import lombok.Builder;
 import lombok.Value;

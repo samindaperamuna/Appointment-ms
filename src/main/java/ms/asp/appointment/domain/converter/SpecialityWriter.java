@@ -1,13 +1,15 @@
 package ms.asp.appointment.domain.converter;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.convert.WritingConverter;
 
-import ms.asp.appointment.domain.ServiceCategory;
+import ms.asp.appointment.domain.Speciality;
 
-public class SpecialityWriter implements Converter<ServiceCategory, String> {
+@WritingConverter
+public class SpecialityWriter implements Converter<Speciality, String> {
 
     @Override
-    public String convert(ServiceCategory source) {
+    public String convert(Speciality source) {
 	return source.getValue();
     }
 }

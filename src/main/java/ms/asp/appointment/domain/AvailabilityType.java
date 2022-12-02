@@ -3,6 +3,8 @@ package ms.asp.appointment.domain;
 import java.util.Arrays;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -15,6 +17,7 @@ public enum AvailabilityType {
     OFFLINE("offline"),
     OTHER("other");
 
+    @JsonValue
     private final String value;
 
     public static Optional<AvailabilityType> get(String value) {
