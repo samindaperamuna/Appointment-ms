@@ -17,7 +17,7 @@ databaseChangeLog:
             name: PUBLIC_ID
             type: VARCHAR(50)
         - column:
-            name: IS_AVAILABLE
+            name: AVAILABLE
             type: BOOLEAN
         - column:
             name: AVAILABILITY_TYPE

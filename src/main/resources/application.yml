@@ -21,4 +21,4 @@ logging:
     
 application:
   reactive-logging-filter:
-    enabled: false
+    enabled: true

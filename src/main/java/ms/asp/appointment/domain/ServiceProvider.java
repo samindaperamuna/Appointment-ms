@@ -1,7 +1,7 @@
 package ms.asp.appointment.domain;
 
 import java.time.DayOfWeek;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Set;
 
 import org.springframework.data.annotation.Transient;
@@ -18,17 +18,17 @@ public class ServiceProvider extends AuditedEntity {
     private String subTitle;
     private String location;
     private double price;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalTime start;
+    private LocalTime end;
     private boolean fullDayReservation;
     private int ordersPerDaySlot;
     private boolean hasDescription;
-    private boolean isActive;
-    
+    private boolean active;
+
     @Transient
     private Set<ServiceType> serviceTypes;
     private String serviceTypesJSON;
-    
+
     @Transient
     private Set<DayOfWeek> offDays;
     private String offDaysJSON;
@@ -36,13 +36,13 @@ public class ServiceProvider extends AuditedEntity {
     @Transient
     private Contact contact;
     private Long contactId;
-    
+
     @Transient
     private Set<Slot> amSlots;
-    
+
     @Transient
     private Set<Slot> pmSlots;
-        
+
     @Transient
-    private Set<Availability> availabilty;
+    private Set<Availability> availability;
 }

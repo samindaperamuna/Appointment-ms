@@ -11,9 +11,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SlotModel extends BaseModel {
-
-    private String status;
+public class AppointmentSlotModel extends BaseSlotModel {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
@@ -22,7 +20,4 @@ public class SlotModel extends BaseModel {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime end;
-
-    private boolean overbooked;
-    private String comment;
 }

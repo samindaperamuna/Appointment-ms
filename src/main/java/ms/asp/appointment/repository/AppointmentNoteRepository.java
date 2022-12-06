@@ -74,7 +74,7 @@ public class AppointmentNoteRepository {
 		.rowsUpdated();
     }
 
-    public Flux<Note> findNote(Appointment appointment, int fetchSize) {
+    public Flux<Note> findNotes(Appointment appointment, int fetchSize) {
 	return databaseClient.sql(APPOINTMENT_NOTE_SELECT_SQL)
 		.bind("id", appointment.getId())
 		.filter((statement, executeFunction) -> statement.fetchSize(fetchSize).execute())

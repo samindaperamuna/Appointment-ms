@@ -9,6 +9,6 @@ import lombok.EqualsAndHashCode;
 @Table("AVAILABILITY")
 @EqualsAndHashCode(callSuper = true)
 public class Availability extends BaseEntity {
-    private boolean isAvailable;
     private AvailabilityType availabilityType;
+    private boolean available;
 }

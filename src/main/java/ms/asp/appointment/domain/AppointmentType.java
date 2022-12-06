@@ -11,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum AppointmentType {
-    DEFAULT("default");
+    DEFAULT("default"),
+    RESCHEDULED("rescheduled");
 
     @JsonValue
     private final String value;

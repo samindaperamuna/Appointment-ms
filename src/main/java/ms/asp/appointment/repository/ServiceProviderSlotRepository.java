@@ -1,6 +1,5 @@
 package ms.asp.appointment.repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.function.BiFunction;
@@ -50,7 +49,7 @@ public class ServiceProviderSlotRepository {
 	    + " INNER JOIN SERVICE_PROVIDER as sp ON sps.SERVICE_PROVIDER_ID = sp.ID"
 	    + " INNER JOIN SLOT as s ON sps.SLOT_ID = s.ID"
 	    + " WHERE sps.SERVICE_PROVIDER_ID LIKE :id"
-	    + " AND s.END BETWEEN :startTime AND DATE_ADD(:startTime, INTERVAL 12 HOUR)";
+	    + " AND TIME(s.START) BETWEEN :startTime AND ADDTIME(:startTime, '12:00')";
 
     public Mono<Long> saveServiceProviderSlot(ServiceProvider provider, Slot slot) {
 	return databaseClient.sql(PROVIDER_SLOT_INSERT_SQL)
@@ -72,35 +71,31 @@ public class ServiceProviderSlotRepository {
     public Mono<Integer> deleteServiceProviderSlot(ServiceProvider provider, Slot slot) {
 	return databaseClient.sql(PROVIDER_SLOT_DELETE_SQL)
 		.bind("providerId", provider.getId())
-		.bind("slotIdd", slot.getId())
+		.bind("slotId", slot.getId())
 		.fetch()
 		.rowsUpdated();
     }
 
-    public Flux<Slot> findAMSlots(ServiceProvider provider, LocalDate date, int fetchSize) {
-	LocalDateTime dateTime = date.atTime(LocalTime.MIDNIGHT);
-
-	return findSlot(provider, dateTime, fetchSize);
+    public Flux<Slot> findAMSlots(ServiceProvider provider, int fetchSize) {
+	return findSlot(provider, LocalTime.MIDNIGHT, fetchSize);
     }
 
-    public Flux<Slot> findPMSlots(ServiceProvider provider, LocalDate date, int fetchSize) {
-	LocalDateTime dateTime = date.atTime(LocalTime.NOON);
-
-	return findSlot(provider, dateTime, fetchSize);
+    public Flux<Slot> findPMSlots(ServiceProvider provider, int fetchSize) {
+	return findSlot(provider, LocalTime.NOON, fetchSize);
     }
 
     /**
      * Fetch the slots between 12 hour intervals for a given date.
      * 
      * @param provider  {@link ServiceProvider}
-     * @param dateTime  {@link LocalDateTime}
+     * @param time      {@link LocalDateTime}
      * @param fetchSize Max no of results
      * @return
      */
-    private Flux<Slot> findSlot(ServiceProvider provider, LocalDateTime dateTime, int fetchSize) {
+    private Flux<Slot> findSlot(ServiceProvider provider, LocalTime time, int fetchSize) {
 	return databaseClient.sql(AM_SLOT_SQL)
 		.bind("id", provider.getId())
-		.bind("startTime", dateTime)
+		.bind("startTime", time)
 		.filter((statement, executeFunction) -> statement.fetchSize(fetchSize).execute())
 		.map(MAPPING_FUNCTION)
 		.all();

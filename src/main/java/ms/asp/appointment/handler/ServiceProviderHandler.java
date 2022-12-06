@@ -6,8 +6,9 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import lombok.RequiredArgsConstructor;
-import ms.asp.appointment.model.AppointmentModel;
-import ms.asp.appointment.service.AppointmentService;
+import ms.asp.appointment.exception.AppointmentException;
+import ms.asp.appointment.model.ServiceProviderModel;
+import ms.asp.appointment.service.ServiceProviderService;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -16,33 +17,57 @@ public class ServiceProviderHandler {
 
     private static final String idTemplate = "publicId";
 
-    private final AppointmentService appointmentService;
+    private final ServiceProviderService serviceProviderService;
 
     public Mono<ServerResponse> all(ServerRequest req) {
 	return req.bodyToMono(Pageable.class)
-		.flatMap(pageable -> ServerResponse.ok().body(appointmentService.findAll(pageable),
-			AppointmentModel.class));
+		.flatMap(pageable -> ServerResponse.ok().body(serviceProviderService.findAll(pageable),
+			ServiceProviderModel.class))
+		.onErrorResume(e -> {
+		    return Mono.error(new AppointmentException("Couldn't fetch service providers {pageable}: "
+			    + e.getLocalizedMessage()));
+		});
     }
 
     public Mono<ServerResponse> byPublicId(ServerRequest req) {
-	return ServerResponse.ok().body(appointmentService.findOne(req.pathVariable(idTemplate)),
-		AppointmentModel.class);
+	var id = req.pathVariable(idTemplate);
+
+	return ServerResponse.ok().body(serviceProviderService.findOne(id),
+		ServiceProviderModel.class)
+		.onErrorResume(e -> {
+		    return Mono.error(new AppointmentException("Couldn't fetch service provider with id: "
+			    + id + e.getLocalizedMessage()));
+		});
     }
 
     public Mono<ServerResponse> create(ServerRequest req) {
-	return req.bodyToMono(AppointmentModel.class)
-		.flatMap(appointment -> ServerResponse.ok().body(appointmentService.create(appointment),
-			AppointmentModel.class));
+	return req.bodyToMono(ServiceProviderModel.class)
+		.flatMap(appointment -> ServerResponse.ok().body(serviceProviderService.create(appointment),
+			ServiceProviderModel.class))
+		.onErrorResume(e -> {
+		    return Mono.error(new AppointmentException("Couldn't create new service provider: "
+			    + e.getLocalizedMessage()));
+		});
     }
 
     public Mono<ServerResponse> update(ServerRequest req) {
-	return req.bodyToMono(AppointmentModel.class)
-		.flatMap(appointment -> ServerResponse.ok().body(appointmentService.update(appointment),
-			AppointmentModel.class));
+	return req.bodyToMono(ServiceProviderModel.class)
+		.flatMap(appointment -> ServerResponse.ok().body(serviceProviderService.update(appointment),
+			ServiceProviderModel.class))
+		.onErrorResume(e -> {
+		    return Mono.error(new AppointmentException("Couldn't update service provider: "
+			    + e.getLocalizedMessage()));
+		});
     }
 
     public Mono<ServerResponse> delete(ServerRequest req) {
-	return ServerResponse.ok().body(appointmentService.delete(req.pathVariable(idTemplate)),
-		AppointmentModel.class);
+	var id = req.pathVariable(idTemplate);
+
+	return ServerResponse.ok().body(serviceProviderService.delete(id),
+		ServiceProviderModel.class)
+		.onErrorResume(e -> {
+		    return Mono.error(new AppointmentException("Couldn't delete service provider with id: " + id
+			    + ": " + e.getLocalizedMessage()));
+		});
     }
 }

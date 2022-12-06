@@ -178,6 +178,7 @@
 					<compilerArgs>
 						<compilerArg>-Amapstruct.verbose=true</compilerArg>
 						<compilerArg>-Amapstruct.unmappedTargetPolicy=IGNORE</compilerArg>
+						<compilerArg>-Amapstruct.defaultComponentModel=spring</compilerArg>
 					</compilerArgs>
 				</configuration>
 			</plugin>

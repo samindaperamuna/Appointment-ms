@@ -74,7 +74,7 @@ public class AppointmentSlotRepository {
 		.rowsUpdated();
     }
 
-    public Flux<Slot> findSlot(Appointment appointment, int fetchSize) {
+    public Flux<Slot> findSlots(Appointment appointment, int fetchSize) {
 	return databaseClient.sql(APPOINTMENT_SLOT_SELECT_SQL)
 		.bind("id", appointment.getId())
 		.filter((statement, executeFunction) -> statement.fetchSize(fetchSize).execute())

@@ -33,10 +33,10 @@ databaseChangeLog:
             type: CURRENCY         
         - column:
             name: START
-            type: DATETIME
+            type: TIME
         - column:
             name: END
-            type: DATETIME
+            type: TIME
         - column:
             name: FULL_DAY_RESERVATION
             type: BOOLEAN         
@@ -50,14 +50,14 @@ databaseChangeLog:
             name: HAS_DESCRIPTION
             type: BOOLEAN
         - column:
-            name: IS_ACTIVE
+            name: ACTIVE
             type: BOOLEAN
         - column:
             name: CREATED
-            type: DATE
+            type: DATETIME
         - column:
             name: MODIFIED
-            type: DATE
+            type: DATETIME
         - column:
             name: VERSION
             type: INT

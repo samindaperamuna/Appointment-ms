@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 import ms.asp.appointment.domain.CodeableConcept;
 import ms.asp.appointment.model.CodeableConceptModel;
 
-@Mapper(componentModel = "spring")
+@Mapper
 public interface CodeableMapper extends BaseMapper<CodeableConcept, CodeableConceptModel> {
 
     @Mapping(target = "display")

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
@@ -85,11 +84,11 @@ public class ServiceProviderRepositoryTest {
 		    assertNotNull(p);
 		    assertNotNull(p.getOffDaysJSON());
 		    assertNotNull(p.getServiceTypesJSON());
-		    
-		    serviceProviderSlotRepository.findAMSlots(p, LocalDate.parse("2022-11-30"), 10)
-		    	.subscribe(s -> {
-		    	    assertNotNull(s);
-		    	});
+
+		    serviceProviderSlotRepository.findAMSlots(p, 10)
+			    .subscribe(s -> {
+				assertNotNull(s);
+			    });
 		})
 		.verifyComplete();
     }

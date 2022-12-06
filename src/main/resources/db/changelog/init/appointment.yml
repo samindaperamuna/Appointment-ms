@@ -45,10 +45,10 @@ databaseChangeLog:
             type: VARCHAR(500)
         - column:
             name: START
-            type: DATE
+            type: DATETIME
         - column:
             name: END
-            type: DATE
+            type: DATETIME
         - column:
             name: MINUTES_DURATION
             type: INT
@@ -66,10 +66,10 @@ databaseChangeLog:
             type: INT
         - column:
             name: CREATED
-            type: DATE
+            type: DATETIME
         - column:
             name: MODIFIED
-            type: DATE
+            type: DATETIME
         - column:
             name: VERSION
             type: INT

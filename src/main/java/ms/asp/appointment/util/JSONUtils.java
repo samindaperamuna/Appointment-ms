@@ -1,5 +1,6 @@
 package ms.asp.appointment.util;
 
+import java.time.DayOfWeek;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -60,5 +61,10 @@ public class JSONUtils {
     @SuppressWarnings("unchecked")
     public static Set<ServiceType> jsonToServiceType(String json) {
 	return (Set<ServiceType>) jsonToObject(json, new TypeReference<Set<ServiceType>>() {});
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static Set<DayOfWeek> jsonToOffDays(String json) {
+	return (Set<DayOfWeek>) jsonToObject(json, new TypeReference<Set<DayOfWeek>>() {});
     }
 }

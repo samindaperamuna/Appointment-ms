@@ -11,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ServiceCategory {
-    DEFAULT("default");
+    DEFAULT("default"),
+    HEALTH("health");
 
     @JsonValue
     private final String value;

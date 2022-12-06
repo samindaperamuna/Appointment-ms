@@ -11,6 +11,8 @@ import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
 import ms.asp.appointment.domain.converter.AppointmentTypeReader;
 import ms.asp.appointment.domain.converter.AppointmentTypeWriter;
+import ms.asp.appointment.domain.converter.AvailabilityTypeReader;
+import ms.asp.appointment.domain.converter.AvailabilityTypeWriter;
 import ms.asp.appointment.domain.converter.CancellationReasonReader;
 import ms.asp.appointment.domain.converter.CancellationReasonWriter;
 import ms.asp.appointment.domain.converter.ServiceCategoryReader;
@@ -40,6 +42,8 @@ public class R2DBCConfig extends AbstractR2dbcConfiguration {
 		new ServiceCategoryReader(),
 		new ServiceCategoryWriter(),
 		new SpecialityReader(),
-		new SpecialityWriter());
+		new SpecialityWriter(),
+		new AvailabilityTypeReader(),
+		new AvailabilityTypeWriter());
     }
 }

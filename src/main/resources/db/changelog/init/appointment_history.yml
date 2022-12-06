@@ -17,12 +17,15 @@ databaseChangeLog:
             name: PUBLIC_ID
             type: VARCHAR(50)
         - column:
+            name: APPOINTMENT_ID
+            type: INT
+        - column:
             name: STATUS
             type: VARCHAR(30)
         - column:
             name: CANCELLATION_REASON
             type: VARCHAR(255)
-        - colum:
+        - column:
             name: PRIORITY
             type: INT
         - column:
@@ -33,10 +36,10 @@ databaseChangeLog:
             type: VARCHAR(500)
         - column:
             name: START
-            type: DATE
+            type: DATETIME
         - column:
             name: END
-            type: DATE
+            type: DATETIME
         - column:
             name: MINUTE_DURATION
             type: INT
@@ -51,10 +54,10 @@ databaseChangeLog:
             type: INT
         - column:
             name: CREATED
-            type: DATE
+            type: DATETIME
         - column:
             name: MODIFIED
-            type: DATE
+            type: DATETIME
         - column:
             name: VERSION
             type: INT

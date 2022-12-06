@@ -1,5 +1,6 @@
 package ms.asp.appointment.repository;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import org.springframework.r2dbc.core.DatabaseClient;
@@ -24,8 +25,10 @@ public class ServiceProviderAvailabilityRepository {
 	Availability availability = new Availability();
 	availability.setId(row.get("ID", Long.class));
 	availability.setPublicId(row.get("PUBLIC_ID", String.class));
-	availability.setAvailable(row.get("IS_AVAILABLE", Boolean.class));
-	availability.setAvailabilityType(row.get("AVAILABILITY_TYPE", AvailabilityType.class));
+	availability.setAvailable(row.get("AVAILABLE", Boolean.class));
+
+	Optional<AvailabilityType> optional = AvailabilityType.get(row.get("AVAILABILITY_TYPE").toString());
+	optional.ifPresent(a -> availability.setAvailabilityType(a));
 
 	return availability;
     };
@@ -42,8 +45,8 @@ public class ServiceProviderAvailabilityRepository {
 	    + " WHERE (SERVICE_PROVIDER_ID=:providerId AND AVAILABILITY_ID=:availabilityId)";
 
     private final String PROVIDER_AVAILABILITY_SELECT_SQL = "SELECT a.* FROM SERVICE_PROVIDER_AVAILABILITY as spa"
-	    + " INNER JOIN SERVICE_PROVIDER as sp ON spa.SERVICE_PROVIDER_ID = sp.ID"
-	    + " INNER JOIN AVAILABILITY as a ON sps.AVAILABILITY_ID=a.ID"
+	    + " INNER JOIN SERVICE_PROVIDER as sp ON spa.SERVICE_PROVIDER_ID=sp.ID"
+	    + " INNER JOIN AVAILABILITY as a ON spa.AVAILABILITY_ID=a.ID"
 	    + " WHERE spa.SERVICE_PROVIDER_ID LIKE :id";
 
     public Mono<Long> saveServiceProviderAvailability(ServiceProvider provider, Availability availability) {
@@ -55,7 +58,8 @@ public class ServiceProviderAvailabilityRepository {
 		.map(r -> (Long) r.get("ID"));
     }
 
-    public Mono<Integer> updateServiceProviderAvailability(ServiceProvider provider, Availability availability, Long id) {
+    public Mono<Integer> updateServiceProviderAvailability(ServiceProvider provider, Availability availability,
+	    Long id) {
 	return databaseClient.sql(PROVIDER_AVAILABILITY_UPDATE_SQL)
 		.bind("providerId", provider.getId())
 		.bind("availabilityId", availability.getId())

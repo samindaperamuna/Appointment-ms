@@ -12,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import ms.asp.appointment.domain.AppointmentType;
 import ms.asp.appointment.domain.Reason;
 import ms.asp.appointment.domain.ServiceCategory;
+import ms.asp.appointment.domain.ServiceProvider;
 import ms.asp.appointment.domain.Speciality;
 
 @Data
@@ -19,6 +20,7 @@ import ms.asp.appointment.domain.Speciality;
 public class AppointmentModel extends BaseModel {
     private String status;
     private String cancellationReason;
+    private ServiceProvider serviceProvider;
     private ServiceCategory serviceCategory;
     private Speciality speciality;
     private AppointmentType appointmentType;
@@ -37,7 +39,7 @@ public class AppointmentModel extends BaseModel {
     private LocalDateTime end;
 
     private int minutesDuration;
-    private Set<SlotModel> slots;
+    private Set<AppointmentSlotModel> slots;
     private LocalDateTime created;
     private LocalDateTime modified;
     private String comment;

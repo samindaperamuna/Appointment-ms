@@ -11,7 +11,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Speciality {
-    DEFAULT("default");
+    DEFAULT("default"),
+    PSYCH("psych");
 
     @JsonValue
     private final String value;

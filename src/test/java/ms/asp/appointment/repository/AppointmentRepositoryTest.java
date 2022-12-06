@@ -6,13 +6,13 @@ import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 
 import ms.asp.appointment.domain.Appointment;
 import ms.asp.appointment.domain.AppointmentType;
 import reactor.test.StepVerifier;
 
-@SpringBootTest
+@DataR2dbcTest
 public class AppointmentRepositoryTest {
 
     @Autowired

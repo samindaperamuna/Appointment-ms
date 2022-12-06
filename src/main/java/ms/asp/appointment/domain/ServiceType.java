@@ -19,7 +19,8 @@ public enum ServiceType {
 
     // Health
     MEDICINCE("med"),
-    GYNOCOLOGIST("gyno");
+    GYNOCOLOGIST("gyno"),
+    PSYCHOLOGIST("psych");
 
     @JsonValue
     private final String value;

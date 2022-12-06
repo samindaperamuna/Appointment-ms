@@ -3,6 +3,6 @@ package ms.asp.appointment.model;
 import lombok.Data;
 
 @Data
-public class BaseModel {
+public abstract class BaseModel {
     private String publicId;
 }
