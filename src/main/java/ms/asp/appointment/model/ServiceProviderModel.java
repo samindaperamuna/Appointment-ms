@@ -10,8 +10,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import ms.asp.appointment.domain.Availability;
-import ms.asp.appointment.domain.Contact;
 import ms.asp.appointment.domain.ServiceType;
 
 @Data
@@ -20,7 +18,7 @@ public class ServiceProviderModel extends BaseModel {
 
     private String subTitle;
     private String location;
-    private Contact contact;
+    private ContactModel contact;
     private double price;
     private boolean active;
 
@@ -40,5 +38,5 @@ public class ServiceProviderModel extends BaseModel {
     private Set<ServiceProviderSlotModel> amSlots;
     private Set<ServiceProviderSlotModel> pmSlots;
     private Set<ServiceType> serviceTypes;
-    private Set<Availability> availability;
+    private Set<AvailabilityModel> availability;
 }

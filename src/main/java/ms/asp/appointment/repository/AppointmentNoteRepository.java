@@ -31,24 +31,24 @@ public class AppointmentNoteRepository {
 	return note;
     };
 
-    private final String APPOINTMENT_NOTE_INSERT_SQL = "INSERT INTO APPOINTMENT_NOTE"
+    private final String INSERT_SQL = "INSERT INTO APPOINTMENT_NOTE"
 	    + " (APPOINTMENT_ID, NOTE_ID)"
 	    + " VALUES (:appointmentId, :noteId)";
 
-    private final String APPOINTMENT_NOTE_UPDATE_SQL = "UPDATE APPOINTMENT_NOTE"
+    private final String UPDATE_SQL = "UPDATE APPOINTMENT_NOTE"
 	    + " SET APPOINTMENT_ID=:appointmentId, NOTE_ID=:noteId"
 	    + " WHERE (ID=:id)";
 
-    private final String APPOINTMENT_NOTE_DELETE_SQL = "DELETE FROM APPOINTMENT_NOTE"
+    private final String DELETE_SQL = "DELETE FROM APPOINTMENT_NOTE"
 	    + " WHERE (APPOINTMENT_ID=:appointmentId AND NOTE_ID=:noteId)";
 
-    private final String APPOINTMENT_NOTE_SELECT_SQL = "SELECT n.* FROM APPOINTMENT_NOTE as apn"
+    private final String SELECT_SQL = "SELECT n.* FROM APPOINTMENT_NOTE as apn"
 	    + " INNER JOIN APPOINTMENT as ap ON apn.APPOINTMENT_ID = ap.ID"
 	    + " INNER JOIN NOTE as n ON apn.NOTE_ID = n.ID"
 	    + " WHERE apn.APPOINTMENT_ID LIKE :id";
 
     public Mono<Long> saveAppointmentNote(Appointment appointment, Note note) {
-	return databaseClient.sql(APPOINTMENT_NOTE_INSERT_SQL)
+	return databaseClient.sql(INSERT_SQL)
 		.bind("appointmentId", appointment.getId())
 		.bind("noteId", note.getId())
 		.fetch()
@@ -58,7 +58,7 @@ public class AppointmentNoteRepository {
 
     public Mono<Integer> updateAppointmentNote(Appointment appointment, Note note,
 	    Long id) {
-	return databaseClient.sql(APPOINTMENT_NOTE_UPDATE_SQL)
+	return databaseClient.sql(UPDATE_SQL)
 		.bind("appointmentId", appointment.getId())
 		.bind("noteId", note.getId())
 		.bind("id", id)
@@ -67,7 +67,7 @@ public class AppointmentNoteRepository {
     }
 
     public Mono<Integer> deleteAppointmentNote(Appointment appointment, Note note) {
-	return databaseClient.sql(APPOINTMENT_NOTE_DELETE_SQL)
+	return databaseClient.sql(DELETE_SQL)
 		.bind("appointmentId", appointment.getId())
 		.bind("noteId", note.getId())
 		.fetch()
@@ -75,7 +75,7 @@ public class AppointmentNoteRepository {
     }
 
     public Flux<Note> findNotes(Appointment appointment, int fetchSize) {
-	return databaseClient.sql(APPOINTMENT_NOTE_SELECT_SQL)
+	return databaseClient.sql(SELECT_SQL)
 		.bind("id", appointment.getId())
 		.filter((statement, executeFunction) -> statement.fetchSize(fetchSize).execute())
 		.map(MAPPING_FUNCTION)

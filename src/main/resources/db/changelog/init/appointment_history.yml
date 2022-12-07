@@ -35,13 +35,25 @@ databaseChangeLog:
             name: SUPPORTING_INFORMATION
             type: VARCHAR(500)
         - column:
+            name: SERVICE_PROVIDER_ID
+            type: INT
+        - column:
+            name: SERVICE_CATEGORY
+            type: VARCHAR(50)
+        - column:
+            name: SPECIALITY
+            type: VARCHAR(50)
+        - column:
+            name: APPOINTMENT_TYPE
+            type: VARCHAR(50)
+        - column:
             name: START
             type: DATETIME
         - column:
             name: END
             type: DATETIME
         - column:
-            name: MINUTE_DURATION
+            name: MINUTES_DURATION
             type: INT
         - column:
             name: COMMENT
@@ -51,6 +63,9 @@ databaseChangeLog:
             type: VARCHAR(50)
         - column:
             name: REASON_ID
+            type: INT
+        - column:
+            name: PERIOD_ID
             type: INT
         - column:
             name: CREATED

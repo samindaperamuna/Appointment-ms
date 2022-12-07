@@ -11,4 +11,5 @@ import lombok.EqualsAndHashCode;
 public class AppointmentHistory extends Appointment {
 
     private Long appointmentId;
+    private long version;
 }

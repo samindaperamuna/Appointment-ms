@@ -34,25 +34,25 @@ public class ServiceProviderSlotRepository {
 	return slot;
     };
 
-    private final String PROVIDER_SLOT_INSERT_SQL = "INSERT INTO SERVICE_PROVIDER_SLOT"
+    private final String INSERT_SQL = "INSERT INTO SERVICE_PROVIDER_SLOT"
 	    + " (SERVICE_PROVIDER_ID, SLOT_ID)"
 	    + " VALUES (:providerId, :slotId)";
 
-    private final String PROVIDER_SLOT_UPDATE_SQL = "UPDATE SERVICE_PROVIDER_SLOT"
+    private final String UPDATE_SQL = "UPDATE SERVICE_PROVIDER_SLOT"
 	    + " SET SERVICE_PROVIDER_ID=:providerId, SLOT_ID=:slotId"
 	    + " WHERE (ID=:id)";
 
-    private final String PROVIDER_SLOT_DELETE_SQL = "DELETE FROM SERVICE_PROVIDER_SLOT"
+    private final String DELETE_SQL = "DELETE FROM SERVICE_PROVIDER_SLOT"
 	    + " WHERE SERVICE_PROVIDER_ID=:providerId AND SLOT_ID=:slotId";
 
-    private final String AM_SLOT_SQL = "SELECT s.* FROM SERVICE_PROVIDER_SLOT as sps"
+    private final String SELECT_SQL = "SELECT s.* FROM SERVICE_PROVIDER_SLOT as sps"
 	    + " INNER JOIN SERVICE_PROVIDER as sp ON sps.SERVICE_PROVIDER_ID = sp.ID"
 	    + " INNER JOIN SLOT as s ON sps.SLOT_ID = s.ID"
 	    + " WHERE sps.SERVICE_PROVIDER_ID LIKE :id"
 	    + " AND TIME(s.START) BETWEEN :startTime AND ADDTIME(:startTime, '12:00')";
 
     public Mono<Long> saveServiceProviderSlot(ServiceProvider provider, Slot slot) {
-	return databaseClient.sql(PROVIDER_SLOT_INSERT_SQL)
+	return databaseClient.sql(INSERT_SQL)
 		.bind("providerId", provider.getId())
 		.bind("slotId", slot.getId())
 		.fetch()
@@ -61,7 +61,7 @@ public class ServiceProviderSlotRepository {
     }
 
     public Mono<Integer> updateServiceProviderSlot(ServiceProvider provider, Slot slot) {
-	return databaseClient.sql(PROVIDER_SLOT_UPDATE_SQL)
+	return databaseClient.sql(UPDATE_SQL)
 		.bind("providerId", provider.getId())
 		.bind("slotId", slot.getId())
 		.fetch()
@@ -69,7 +69,7 @@ public class ServiceProviderSlotRepository {
     }
 
     public Mono<Integer> deleteServiceProviderSlot(ServiceProvider provider, Slot slot) {
-	return databaseClient.sql(PROVIDER_SLOT_DELETE_SQL)
+	return databaseClient.sql(DELETE_SQL)
 		.bind("providerId", provider.getId())
 		.bind("slotId", slot.getId())
 		.fetch()
@@ -93,7 +93,7 @@ public class ServiceProviderSlotRepository {
      * @return
      */
     private Flux<Slot> findSlot(ServiceProvider provider, LocalTime time, int fetchSize) {
-	return databaseClient.sql(AM_SLOT_SQL)
+	return databaseClient.sql(SELECT_SQL)
 		.bind("id", provider.getId())
 		.bind("startTime", time)
 		.filter((statement, executeFunction) -> statement.fetchSize(fetchSize).execute())

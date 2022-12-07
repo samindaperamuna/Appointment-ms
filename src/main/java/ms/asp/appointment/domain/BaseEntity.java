@@ -1,7 +1,5 @@
 package ms.asp.appointment.domain;
 
-import static ms.asp.appointment.util.CommonUtils.generatePublicId;
-
 import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
@@ -15,8 +13,4 @@ public abstract class BaseEntity implements Serializable {
     private Long id;
 
     private String publicId;
-
-    public BaseEntity() {
-	publicId = generatePublicId();
-    }
 }

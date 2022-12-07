@@ -16,6 +16,7 @@ import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.exception.ServiceProviderException;
 import ms.asp.appointment.mapper.ServiceProviderMapper;
 import ms.asp.appointment.model.ServiceProviderModel;
+import ms.asp.appointment.repository.AppointmentRepository;
 import ms.asp.appointment.repository.AvailabilityRepository;
 import ms.asp.appointment.repository.BaseRepository;
 import ms.asp.appointment.repository.ContactRepository;
@@ -31,6 +32,7 @@ import reactor.core.publisher.Mono;
 @Transactional
 public class ServiceProviderService extends AbstractService<ServiceProvider, Long, ServiceProviderModel> {
 
+    private final AppointmentRepository appointmentRepository;
     private final ContactRepository contactRepository;
     private final SlotRepository slotRepository;
     private final ServiceProviderSlotRepository providerSlotRepository;
@@ -45,6 +47,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
      */
     public ServiceProviderService(
 	    ServiceProviderRepository repository,
+	    AppointmentRepository appointmentRepository,
 	    ContactRepository contactRepository,
 	    SlotRepository slotRepository,
 	    ServiceProviderSlotRepository providerSlotRepository,
@@ -54,6 +57,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 
 	super(repository, mapper);
 
+	this.appointmentRepository = appointmentRepository;
 	this.contactRepository = contactRepository;
 	this.slotRepository = slotRepository;
 	this.providerSlotRepository = providerSlotRepository;
@@ -75,15 +79,88 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
     }
 
     public Mono<ServiceProviderModel> update(ServiceProviderModel model) {
-	return save(mapper.toEntity(model))
+	return Mono.just(mapper.toEntity(model))
+		// Get saved service provider
+		.flatMap(p -> repository.findByPublicId(p.getPublicId())
+			.switchIfEmpty(Mono.error(new NotFoundException("No service provider found for that ID")))
+			.map(r -> {
+			    p.setId(r.getId());
+
+			    return p;
+			}))
+		// Get saved contact
+		.flatMap(p -> {
+		    if (p.getContact() == null)
+			return Mono.just(p);
+
+		    return contactRepository.findByPublicId(p.getContact().getPublicId())
+			    .switchIfEmpty(Mono.error(new NotFoundException("No contact found for that ID")))
+			    .map(c -> {
+				p.getContact().setId(c.getId());
+
+				return p;
+			    });
+		})
+		// Get saved slots
+		.flatMap(p -> {
+		    if ((p.getAmSlots() == null || p.getAmSlots().isEmpty())
+			    && (p.getPmSlots() == null || p.getPmSlots().isEmpty()))
+			return Mono.just(p);
+
+		    Set<Slot> slots = new HashSet<>(p.getAmSlots());
+		    slots.addAll(p.getPmSlots());
+
+		    return Mono.just(slots)
+			    .flatMapMany(Flux::fromIterable)
+			    .flatMap(s -> slotRepository.findByPublicId(s.getPublicId())
+				    .switchIfEmpty(Mono.error(new NotFoundException("No slot found for that ID")))
+				    .map(slot -> {
+					s.setId(slot.getId());
+
+					return s;
+				    }))
+			    .collect(Collectors.toSet())
+			    .then(Mono.just(p));
+		})
+		// Get saved availability
+		.flatMap(p -> {
+		    if (p.getAvailability() == null || p.getAvailability().isEmpty())
+			return Mono.just(p);
+
+		    return Mono.just(p.getAvailability())
+			    .flatMapMany(Flux::fromIterable)
+			    .flatMap(a -> availabilityRepository.findByPublicId(a.getPublicId())
+				    .switchIfEmpty(
+					    Mono.error(new NotFoundException("No availability info found for that ID")))
+				    .map(availability -> {
+					a.setId(availability.getId());
+
+					return a;
+				    }))
+			    .collect(Collectors.toSet())
+			    .then(Mono.just(p));
+		})
+		// Save the service provider
+		.flatMap(this::save)
 		.map(mapper::toModel);
     }
 
     public Mono<ServiceProviderModel> delete(String publicId) {
-	var e = new NotFoundException("No ServiceProvider has id = " + publicId);
+	var e = new ServiceProviderException("Service provider has linked appointments");
 
 	return findByPublicId(publicId)
-		.switchIfEmpty(Mono.error(e))
+		.switchIfEmpty(Mono.error(new NotFoundException("No ServiceProvider has id = " + publicId)))
+		// Find appointments
+		.flatMap(p -> {
+		    return appointmentRepository.findByServiceProviderId(p.getId())
+			    .hasElements()
+			    .flatMap(hasElements -> {
+				if (hasElements)
+				    return Mono.error(e);
+				else
+				    return Mono.just(p);
+			    });
+		})
 		// Delete contact
 		.flatMap(p -> contactRepository.deleteById(p.getContactId())
 			.onErrorStop()
@@ -167,8 +244,9 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 
 		    return Mono.just(p);
 		})
-		// Save slots and return
+		// Save service provider
 		.flatMap(p -> repository.save(p))
+		// Save slots and return
 		.flatMap(p -> {
 		    return Mono.just(slots)
 			    .flatMapMany(Flux::fromIterable)

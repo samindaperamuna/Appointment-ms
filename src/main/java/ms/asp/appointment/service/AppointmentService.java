@@ -86,80 +86,22 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
     public Mono<AppointmentModel> create(AppointmentModel model) {
 	var appointment = mapper.toEntity(model);
 
-	return save(appointment);
+	return save(appointment)
+		.map(mapper::toModel);
     }
 
     public Mono<AppointmentModel> findOne(String publicId) {
-	return repository.findByPublicId(publicId)
-		.switchIfEmpty(Mono.error(new NotFoundException("No appointment found for that ID")))
-		// Set period information and return
-		.flatMap(a -> {
-		    if (a.getPeriod() == null) {
-			return Mono.just(a);
-		    }
-
-		    return periodRepository.findById(a.getPeriodId())
-			    .map(p -> {
-				a.setPeriod(p);
-
-				return a;
-			    });
-		})
-		// Set notes and return
-		.flatMap(a -> {
-		    return appointmentNoteRepository.findNotes(a, 5)
-			    .collect(Collectors.toSet())
-			    .map(notes -> {
-				a.setNotes(notes);
-
-				return a;
-			    });
-		})
-		// Set slots and return
-		.flatMap(a -> {
-		    // Set slots
-		    return appoinmentSlotRepository.findSlots(a, 5)
-			    .collect(Collectors.toSet())
-			    .map(slots -> {
-				a.setSlots(slots);
-
-				return a;
-			    });
-		})
-		// Set participants and return
-		.flatMap(a -> {
-		    return participantRepository.findByAppointmentId(a.getId())
-			    .flatMap(p -> {
-				return participantInfoRepository.findById(p.getParticipantInfoId())
-					.flatMap(pi -> {
-					    if (pi.getContactId() == null)
-						return Mono.just(pi);
-
-					    return contactRepository.findById(pi.getContactId())
-						    .map(c -> {
-							pi.setContact(c);
-
-							return pi;
-						    });
-					})
-					.map(pi -> {
-					    p.setParticipantInfo(pi);
-
-					    return p;
-					});
-			    })
-			    .collect(Collectors.toSet())
-			    .map(parts -> {
-				a.setParticipants(parts);
-
-				return a;
-			    });
-		})
+	return findByPublicId(publicId)
 		.map(mapper::toModel);
     }
 
     public Mono<AppointmentModel> update(AppointmentModel model) {
-	return updateVersion(mapper.toEntity(model));
+
+	return save(mapper.toEntity(model))
+		.flatMap(a -> repository.save(a))
+		.flatMap(a -> historyRepository.save(((AppointmentMapper) mapper).toHistory(a))
+			.then(Mono.just(a)))
+		.map(mapper::toModel);
     }
 
     public Mono<AppointmentModel> delete(String publicId) {
@@ -192,12 +134,10 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 		    a.setStart(periodModel.getStart());
 		    a.setEnd(periodModel.getEnd());
 
-		    updateVersion(a);
-
 		    return a;
 		})
-		.map(mapper::toModel)
-		.switchIfEmpty(Mono.error(e));
+		.switchIfEmpty(Mono.error(e))
+		.map(mapper::toModel);
     }
 
     /**
@@ -222,7 +162,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      * @param appointment
      * @return
      */
-    private Mono<AppointmentModel> save(Appointment appointment) {
+    private Mono<Appointment> save(Appointment appointment) {
 
 	return Mono.just(appointment)
 		// Save service provider if exists else throw an error
@@ -333,26 +273,74 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 			    .flatMap(n -> noteRepository.save(n))
 			    .flatMap(n -> appointmentNoteRepository.saveAppointmentNote(a, n))
 			    .then(Mono.just(a));
-		})
-		.map(a -> {
-		    var model = mapper.toModel(a);
-
-		    return model;
 		});
     }
 
-    /**
-     * Increment version for the entity and save. Saves a copy in the history table.
-     * 
-     * @param appointment
-     * @return
-     */
-    private Mono<AppointmentModel> updateVersion(Appointment appointment) {
-	appointment.setVersion(appointment.getVersion() + 1);
+    public Mono<Appointment> findByPublicId(String publicId) {
+	return repository.findByPublicId(publicId)
+		.switchIfEmpty(Mono.error(new NotFoundException("No appointment found for that ID")))
+		// Set period information and return
+		.flatMap(a -> {
+		    if (a.getPeriod() == null) {
+			return Mono.just(a);
+		    }
 
-	// historyRepository.save(((AppointmentMapper) mapper).toHistory(appointment))
-	// .subscribe();
+		    return periodRepository.findById(a.getPeriodId())
+			    .map(p -> {
+				a.setPeriod(p);
 
-	return save(appointment);
+				return a;
+			    });
+		})
+		// Set notes and return
+		.flatMap(a -> {
+		    return appointmentNoteRepository.findNotes(a, 5)
+			    .collect(Collectors.toSet())
+			    .map(notes -> {
+				a.setNotes(notes);
+
+				return a;
+			    });
+		})
+		// Set slots and return
+		.flatMap(a -> {
+		    // Set slots
+		    return appoinmentSlotRepository.findSlots(a, 5)
+			    .collect(Collectors.toSet())
+			    .map(slots -> {
+				a.setSlots(slots);
+
+				return a;
+			    });
+		})
+		// Set participants and return
+		.flatMap(a -> {
+		    return participantRepository.findByAppointmentId(a.getId())
+			    .flatMap(p -> {
+				return participantInfoRepository.findById(p.getParticipantInfoId())
+					.flatMap(pi -> {
+					    if (pi.getContactId() == null)
+						return Mono.just(pi);
+
+					    return contactRepository.findById(pi.getContactId())
+						    .map(c -> {
+							pi.setContact(c);
+
+							return pi;
+						    });
+					})
+					.map(pi -> {
+					    p.setParticipantInfo(pi);
+
+					    return p;
+					});
+			    })
+			    .collect(Collectors.toSet())
+			    .map(parts -> {
+				a.setParticipants(parts);
+
+				return a;
+			    });
+		});
     }
 }

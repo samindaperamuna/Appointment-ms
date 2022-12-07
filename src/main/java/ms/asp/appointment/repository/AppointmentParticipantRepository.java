@@ -32,24 +32,24 @@ public class AppointmentParticipantRepository {
 	return participant;
     };
 
-    private final String APPOINTMENT_PARTICIPANT_INSERT_SQL = "INSERT INTO APPOINTMENT_PARTICIPANT"
+    private final String INSERT_SQL = "INSERT INTO APPOINTMENT_PARTICIPANT"
 	    + " (APPOINTMENT_ID, PARTICIPANT_ID)"
 	    + " VALUES (:appointmentId, :participantId)";
 
-    private final String APPOINTMENT_PARTICIPANT_UPDATE_SQL = "UPDATE APPOINTMENT_PARTICIPANT"
+    private final String UPDATE_SQL = "UPDATE APPOINTMENT_PARTICIPANT"
 	    + " SET APPOINTMENT_ID=:appointmentId, PARTICIPANT_ID=:participantId"
 	    + " WHERE (ID=:id)";
 
-    private final String APPOINTMENT_PARTICIPANT_DELETE_SQL = "DELETE FROM APPOINTMENT_PARTICIPANT"
+    private final String DELETE_SQL = "DELETE FROM APPOINTMENT_PARTICIPANT"
 	    + " WHERE (APPOINTMENT_ID=:appointmentId AND PARTICIPANT_ID=:participantId)";
 
-    private final String APPOINTMENT_PARTICIPANT_SELECT_SQL = "SELECT p.* FROM APPOINTMENT_PARTICIPANT as app"
+    private final String SELECT_SQL = "SELECT p.* FROM APPOINTMENT_PARTICIPANT as app"
 	    + " INNER JOIN APPOINTMENT as ap ON app.APPOINTMENT_ID = ap.ID"
 	    + " INNER JOIN PARTICIPANT as p ON app.PARTICIPANT_ID = p.ID"
 	    + " WHERE app.APPOINTMENT_ID LIKE :id";
 
     public Mono<Long> saveAppointmentParticipant(Appointment appointment, Participant participant) {
-	return databaseClient.sql(APPOINTMENT_PARTICIPANT_INSERT_SQL)
+	return databaseClient.sql(INSERT_SQL)
 		.bind("appointmentId", appointment.getId())
 		.bind("participantId", participant.getId())
 		.fetch()
@@ -59,7 +59,7 @@ public class AppointmentParticipantRepository {
 
     public Mono<Integer> updateAppointmentParticipant(Appointment appointment, Participant participant,
 	    Long id) {
-	return databaseClient.sql(APPOINTMENT_PARTICIPANT_UPDATE_SQL)
+	return databaseClient.sql(UPDATE_SQL)
 		.bind("appointmentId", appointment.getId())
 		.bind("participantId", participant.getId())
 		.bind("id", id)
@@ -68,7 +68,7 @@ public class AppointmentParticipantRepository {
     }
 
     public Mono<Integer> deleteAppointmentParticipant(Appointment appointment, Participant participant) {
-	return databaseClient.sql(APPOINTMENT_PARTICIPANT_DELETE_SQL)
+	return databaseClient.sql(DELETE_SQL)
 		.bind("appointmentId", appointment.getId())
 		.bind("participantId", participant.getId())
 		.fetch()
@@ -76,7 +76,7 @@ public class AppointmentParticipantRepository {
     }
 
     public Flux<Participant> findParticipant(Appointment appointment, int fetchSize) {
-	return databaseClient.sql(APPOINTMENT_PARTICIPANT_SELECT_SQL)
+	return databaseClient.sql(SELECT_SQL)
 		.bind("id", appointment.getId())
 		.filter((statement, executeFunction) -> statement.fetchSize(fetchSize).execute())
 		.map(MAPPING_FUNCTION)

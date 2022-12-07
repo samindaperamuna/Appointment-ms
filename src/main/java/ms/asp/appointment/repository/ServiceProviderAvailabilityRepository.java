@@ -33,24 +33,24 @@ public class ServiceProviderAvailabilityRepository {
 	return availability;
     };
 
-    private final String PROVIDER_AVAILABILITY_INSERT_SQL = "INSERT INTO SERVICE_PROVIDER_AVAILABILITY"
+    private final String INSERT_SQL = "INSERT INTO SERVICE_PROVIDER_AVAILABILITY"
 	    + " (SERVICE_PROVIDER_ID, AVAILABILITY_ID)"
 	    + " VALUES (:providerId, :availabilityId)";
 
-    private final String PROVIDER_AVAILABILITY_UPDATE_SQL = "UPDATE SERVICE_PROVIDER_AVAILABILITY"
+    private final String UPDATE_SQL = "UPDATE SERVICE_PROVIDER_AVAILABILITY"
 	    + " SET SERVICE_PROVIDER_ID=:providerId, AVAILABILITY_ID=:availabilityId"
 	    + " WHERE (ID=:id)";
 
-    private final String PROVIDER_AVAILABILITY_DELETE_SQL = "DELETE FROM SERVICE_PROVIDER_AVAILABILITY"
+    private final String DELETE_SQL = "DELETE FROM SERVICE_PROVIDER_AVAILABILITY"
 	    + " WHERE (SERVICE_PROVIDER_ID=:providerId AND AVAILABILITY_ID=:availabilityId)";
 
-    private final String PROVIDER_AVAILABILITY_SELECT_SQL = "SELECT a.* FROM SERVICE_PROVIDER_AVAILABILITY as spa"
+    private final String SELECT_SQL = "SELECT a.* FROM SERVICE_PROVIDER_AVAILABILITY as spa"
 	    + " INNER JOIN SERVICE_PROVIDER as sp ON spa.SERVICE_PROVIDER_ID=sp.ID"
 	    + " INNER JOIN AVAILABILITY as a ON spa.AVAILABILITY_ID=a.ID"
 	    + " WHERE spa.SERVICE_PROVIDER_ID LIKE :id";
 
     public Mono<Long> saveServiceProviderAvailability(ServiceProvider provider, Availability availability) {
-	return databaseClient.sql(PROVIDER_AVAILABILITY_INSERT_SQL)
+	return databaseClient.sql(INSERT_SQL)
 		.bind("providerId", provider.getId())
 		.bind("availabilityId", availability.getId())
 		.fetch()
@@ -60,7 +60,7 @@ public class ServiceProviderAvailabilityRepository {
 
     public Mono<Integer> updateServiceProviderAvailability(ServiceProvider provider, Availability availability,
 	    Long id) {
-	return databaseClient.sql(PROVIDER_AVAILABILITY_UPDATE_SQL)
+	return databaseClient.sql(UPDATE_SQL)
 		.bind("providerId", provider.getId())
 		.bind("availabilityId", availability.getId())
 		.bind("id", id)
@@ -69,7 +69,7 @@ public class ServiceProviderAvailabilityRepository {
     }
 
     public Mono<Integer> deleteServiceProviderAvailability(ServiceProvider provider, Availability availability) {
-	return databaseClient.sql(PROVIDER_AVAILABILITY_DELETE_SQL)
+	return databaseClient.sql(DELETE_SQL)
 		.bind("providerId", provider.getId())
 		.bind("availabilityId", availability.getId())
 		.fetch()
@@ -77,7 +77,7 @@ public class ServiceProviderAvailabilityRepository {
     }
 
     public Flux<Availability> findAvailability(ServiceProvider provider, int fetchSize) {
-	return databaseClient.sql(PROVIDER_AVAILABILITY_SELECT_SQL)
+	return databaseClient.sql(SELECT_SQL)
 		.bind("id", provider.getId())
 		.filter((statement, executeFunction) -> statement.fetchSize(fetchSize).execute())
 		.map(MAPPING_FUNCTION)

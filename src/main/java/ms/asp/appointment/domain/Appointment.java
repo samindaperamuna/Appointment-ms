@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Table;
 
 import lombok.Data;
@@ -52,4 +53,7 @@ public class Appointment extends AuditedEntity {
     @Transient
     private Period period;
     private Long periodId;
+
+    @Version
+    private long version;
 }
