@@ -17,8 +17,17 @@ databaseChangeLog:
             name: PUBLIC_ID
             type: VARCHAR(50)
         - column:
+            name: DESCRIPTION
+            type: VARCHAR(100)
+        - column:
             name: SERVICE_TYPE_JSON
             type: JSON
         - column:
-            name: APPOINTMENT_TYPE_JSON
-            type: JSON
+            name: APPOINTMENT_TYPE
+            type: VARCHAR(50)
+        - column:
+            name: CREATED
+            type: DATETIME
+        - column:
+            name: MODIFIED
+            type: DATETIME

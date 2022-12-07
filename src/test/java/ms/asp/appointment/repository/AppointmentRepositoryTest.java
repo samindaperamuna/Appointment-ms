@@ -26,7 +26,7 @@ public class AppointmentRepositoryTest {
     @Test
     public void testInsertAndQuery() {
 	Appointment appointment = new Appointment();
-	appointment.setAppointmentType(AppointmentType.DEFAULT);
+	appointment.setAppointmentType(AppointmentType.DOCTOR_PATIENT);
 	appointment.setDescription("Test Appointment");
 	appointment.setMinutesDuration(30);
 

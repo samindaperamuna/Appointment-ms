@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import lombok.RequiredArgsConstructor;
+import ms.asp.appointment.handler.AppointmentFlowHandler;
 import ms.asp.appointment.handler.AppointmentHandler;
 import ms.asp.appointment.handler.ServiceProviderHandler;
 
@@ -21,6 +22,7 @@ public class RouterConfig {
 
     private final AppointmentHandler appointmentHandler;
     private final ServiceProviderHandler serviceProviderHandler;
+    private final AppointmentFlowHandler appointmentFlowHandler;
 
     @Bean
     public RouterFunction<ServerResponse> routes() {
@@ -39,6 +41,14 @@ public class RouterConfig {
 		.andRoute(GET("/serviceproviders/{publicId}"), serviceProviderHandler::byPublicId)
 		.andRoute(POST("/serviceproviders"), serviceProviderHandler::create)
 		.andRoute(PUT("/serviceproviders"), serviceProviderHandler::update)
-		.andRoute(DELETE("/serviceproviders/{publicId}"), serviceProviderHandler::delete);
+		.andRoute(DELETE("/serviceproviders/{publicId}"), serviceProviderHandler::delete)
+		.andRoute(GET("/serviceproviders/{publicId}/schedule"), serviceProviderHandler::schedule)
+	
+		// AppointmentFlow
+        	.andRoute(GET("/appointmentflows"), appointmentFlowHandler::all)
+        	.andRoute(GET("/appointmentflows/{publicId}"), appointmentFlowHandler::byPublicId)
+        	.andRoute(POST("/appointmentflows"), appointmentFlowHandler::create)
+        	.andRoute(PUT("/appointmentflows"), appointmentFlowHandler::update)
+        	.andRoute(DELETE("/appointmentflows/{publicId}"), appointmentFlowHandler::delete);
     }
 }
