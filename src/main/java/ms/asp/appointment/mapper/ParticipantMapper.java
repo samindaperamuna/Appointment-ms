@@ -11,7 +11,7 @@ import org.mapstruct.Named;
 import ms.asp.appointment.domain.Participant;
 import ms.asp.appointment.model.ParticipantModel;
 
-@Mapper
+@Mapper(uses = { ContactMapper.class })
 public interface ParticipantMapper {
 
     @Mapping(source = "participantInfo.name", target = "name")

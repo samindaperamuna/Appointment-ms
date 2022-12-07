@@ -19,11 +19,11 @@ public interface ServiceProviderSlotMapper {
     @Mapping(target = "publicId", source = "publicId", qualifiedByName = "slotPublicId")
     @Mapping(target = "start", expression = "java(LocalDateTime.of(LocalDate.now(), slotModel.getStart()))")
     @Mapping(target = "end", expression = "java(LocalDateTime.of(LocalDate.now(), slotModel.getEnd()))")
-    Slot serviceProviderSlotModelToSlot(ServiceProviderSlotModel slotModel);
+    Slot toEntity(ServiceProviderSlotModel slotModel);
 
     @Mapping(target = "start", expression = "java(slot.getStart().toLocalTime())")
     @Mapping(target = "end", expression = "java(slot.getEnd().toLocalTime())")
-    ServiceProviderSlotModel slotToServiceProviderSlotModel(Slot slot);
+    ServiceProviderSlotModel toModel(Slot slot);
 
     Collection<ServiceProviderSlotModel> toModel(Collection<Slot> e);
 

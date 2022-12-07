@@ -7,7 +7,7 @@ import ms.asp.appointment.domain.Appointment;
 import ms.asp.appointment.domain.AppointmentHistory;
 import ms.asp.appointment.model.AppointmentModel;
 
-@Mapper(uses = { ParticipantMapper.class, ContactMapper.class })
+@Mapper(uses = { ParticipantMapper.class, AppointmentSlotMapper.class })
 public interface AppointmentMapper extends BaseMapper<Appointment, AppointmentModel> {
 
     @Mapping(source = "appointment.id", target = "appointmentId")

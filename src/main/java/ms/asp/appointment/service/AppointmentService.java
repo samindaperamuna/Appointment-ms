@@ -86,7 +86,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
     public Mono<AppointmentModel> create(AppointmentModel model) {
 	var appointment = mapper.toEntity(model);
 
-	return save(appointment)
+	return save(appointment, false)
 		.map(mapper::toModel);
     }
 
@@ -97,10 +97,108 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 
     public Mono<AppointmentModel> update(AppointmentModel model) {
 
-	return save(mapper.toEntity(model))
-		.flatMap(a -> repository.save(a))
-		.flatMap(a -> historyRepository.save(((AppointmentMapper) mapper).toHistory(a))
-			.then(Mono.just(a)))
+	return Mono.just(mapper.toEntity(model))
+		// Get saved appointment
+		.flatMap(a -> repository.findByPublicId(a.getPublicId())
+			.switchIfEmpty(Mono.error(new NotFoundException("No appointment found for that ID")))
+			.map(appointment -> {
+			    a.setId(appointment.getId());
+			    a.setVersion(appointment.getVersion());
+			    a.setCreated(appointment.getCreated());
+			    a.setModified(appointment.getModified());
+
+			    return a;
+			}))
+		// Get saved service provider
+		.flatMap(a -> {
+		    if (a.getServiceProvider() == null || a.getServiceProvider().getPublicId() == null
+			    || a.getServiceProvider().getPublicId().isBlank())
+			return Mono.just(a);
+
+		    return serviceProviderRepository.findByPublicId(a.getServiceProvider().getPublicId())
+			    .switchIfEmpty(Mono.error(new NotFoundException("No service provider found for that ID")))
+			    .map(p -> {
+				a.setServiceProviderId(p.getId());
+
+				return a;
+			    });
+		})
+		// Get saved slots
+		.flatMap(a -> {
+		    if (a.getSlots() == null || a.getSlots().isEmpty())
+			return Mono.just(a);
+
+		    return Mono.just(a.getSlots())
+			    .flatMapMany(Flux::fromIterable)
+			    .map(s -> slotRepository.findByPublicId(s.getPublicId())
+				    .map(slot -> {
+					s.setId(slot.getId());
+
+					return s;
+				    }))
+			    .collect(Collectors.toSet())
+			    .then(Mono.just(a));
+		})
+		// Get saved notes
+		.flatMap(a -> {
+		    if (a.getNotes() == null || a.getNotes().isEmpty())
+			return Mono.just(a);
+
+		    return Mono.just(a.getNotes())
+			    .flatMapMany(Flux::fromIterable)
+			    .map(n -> noteRepository.findByPublicId(n.getPublicId())
+				    .map(note -> {
+					n.setId(note.getId());
+
+					return n;
+				    }))
+			    .collect(Collectors.toSet())
+			    .then(Mono.just(a));
+		})
+		// Get saved participants
+		.flatMap(a -> {
+		    if (a.getParticipants() == null || a.getParticipants().isEmpty())
+			return Mono.just(a);
+
+		    return Mono.just(a.getParticipants())
+			    .flatMapMany(Flux::fromIterable)
+			    .map(p -> participantRepository.findByPublicId(p.getPublicId())
+				    .map(participant -> {
+					p.setId(participant.getId());
+
+					if (p.getParticipantInfo() != null) {
+					    p.getParticipantInfo().setId(participant.getParticipantInfoId());
+					    p.setParticipantInfoId(participant.getParticipantInfoId());
+					}
+
+					return p;
+				    }))
+			    .collect(Collectors.toSet())
+			    .then(Mono.just(a));
+		})
+		// Get saved period
+		.flatMap(a -> {
+		    if (a.getPeriod() == null || a.getPeriod().getPublicId() == null
+			    || a.getPeriod().getPublicId().isBlank())
+			return Mono.just(a);
+
+		    return periodRepository.findByPublicId(a.getPeriod().getPublicId())
+			    .switchIfEmpty(Mono.error(new NotFoundException("No period found for that ID")))
+			    .map(p -> {
+				a.setPeriodId(p.getId());
+
+				return a;
+			    });
+		})
+		// Save appointment history
+		.flatMap(a -> {
+		    return historyRepository.save(((AppointmentMapper) mapper).toHistory(a))
+			    .then(Mono.just(a));
+		})
+		// Save the appointment
+		.flatMap(a -> save(a, true))
+		// Fetch all including not updated
+		.flatMap(p -> findByPublicId(p.getPublicId()))
 		.map(mapper::toModel);
     }
 
@@ -147,13 +245,9 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      * @return {@link Flux<AppointmentHistory}
      */
     public Flux<AppointmentHistory> history(String publicId) {
-	var e = new NotFoundException("No Appointement with id: " + publicId);
 
-	Mono<Long> entityId = repository.findByPublicId(publicId)
-		.map(Appointment::getId);
-
-	return historyRepository.findRevisions(entityId)
-		.switchIfEmpty(Mono.error(e));
+	return historyRepository.findRevisions(publicId)
+		.switchIfEmpty(Flux.error(new NotFoundException("No history found for that ID")));
     }
 
     /**
@@ -162,16 +256,18 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      * @param appointment
      * @return
      */
-    private Mono<Appointment> save(Appointment appointment) {
+    private Mono<Appointment> save(Appointment appointment, boolean update) {
 
 	return Mono.just(appointment)
 		// Save service provider if exists else throw an error
 		.flatMap(a -> {
-		    if (a.getServiceProvider() == null) {
-			return Mono.error(new AppointmentException("No service provider defined"));
-		    } else if (a.getServiceProvider().getPublicId() == null) {
-			return Mono
-				.error(new AppointmentException("A reference to existing service provider required"));
+		    if (a.getServiceProvider() == null || a.getServiceProvider().getPublicId() == null) {
+			// If its update and no service provider return
+			if (update) {
+			    return Mono.just(a);
+			} else {
+			    return Mono.error(new AppointmentException("No service provider defined"));
+			}
 		    }
 
 		    return serviceProviderRepository.findByPublicId(a.getServiceProvider().getPublicId())
@@ -206,7 +302,12 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 		// Save participants if exists else throw an error
 		.flatMap(a -> {
 		    if (a.getParticipants() == null) {
-			return Mono.error(new AppointmentException("No participants are defined"));
+			// If its update and no participants return
+			if (update) {
+			    return Mono.just(a);
+			} else {
+			    return Mono.error(new AppointmentException("No participants are defined"));
+			}
 		    }
 
 		    return Mono.just(a.getParticipants())
@@ -253,7 +354,11 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 		// Save slots if exists else throw an error
 		.flatMap(a -> {
 		    if (a.getSlots() == null) {
-			return Mono.error(new AppointmentException("No slots are defined"));
+			if (update) {
+			    return Mono.just(a);
+			} else {
+			    return Mono.error(new AppointmentException("No slots are defined"));
+			}
 		    }
 
 		    return Mono.just(a.getSlots())

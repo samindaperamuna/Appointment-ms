@@ -88,7 +88,7 @@ public class AppointmentHandler {
 	var id = req.pathVariable(ID_TEMPLATE);
 
 	return ServerResponse.ok()
-		.body(appointmentService.history(req.pathVariable(id)), AppointmentModel.class)
+		.body(appointmentService.history(id), AppointmentModel.class)
 		.onErrorResume(e -> {
 		    return Mono.error(new AppointmentException("Couldn't get history for appointment with id: " + id
 			    + ": " + e.getLocalizedMessage()));
