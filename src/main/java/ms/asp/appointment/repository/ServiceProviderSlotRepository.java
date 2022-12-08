@@ -12,6 +12,7 @@ import io.r2dbc.spi.RowMetadata;
 import lombok.RequiredArgsConstructor;
 import ms.asp.appointment.domain.ServiceProvider;
 import ms.asp.appointment.domain.Slot;
+import ms.asp.appointment.util.JSONUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -26,11 +27,13 @@ public class ServiceProviderSlotRepository {
 	slot.setId(row.get("ID", Long.class));
 	slot.setPublicId(row.get("PUBLIC_ID", String.class));
 	slot.setStatus(row.get("STATUS", String.class));
-	slot.setStart(row.get("START", LocalDateTime.class));
-	slot.setEnd(row.get("END", LocalDateTime.class));
+	slot.setStart(row.get("START", LocalTime.class));
+	slot.setEnd(row.get("END", LocalTime.class));
 	slot.setOverbooked(row.get("OVERBOOKED", Boolean.class));
-	slot.setScheduleId(row.get("SCHEDULE_ID", Long.class));
-
+	slot.setWholeWeek(row.get("WHOLE_WEEK", Boolean.class));
+	slot.setValidDaysJSON(row.get("VALID_DAYS_JSON", String.class));
+	slot.setValidDays(JSONUtils.jsonToOffDays(slot.getValidDaysJSON()));
+	
 	return slot;
     };
 

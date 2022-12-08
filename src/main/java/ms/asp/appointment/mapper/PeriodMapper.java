@@ -7,17 +7,17 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import ms.asp.appointment.domain.Availability;
-import ms.asp.appointment.model.AvailabilityModel;
+import ms.asp.appointment.domain.Period;
+import ms.asp.appointment.model.PeriodModel;
 
 @Mapper(config = BaseMapper.class)
-public interface AvailabilityMapper extends BaseMapper<Availability, AvailabilityModel> {
-
+public interface PeriodMapper extends BaseMapper<Period, PeriodModel>{
+    
     @InheritConfiguration
-    @Mapping(target = "publicId", source = "publicId", qualifiedByName = "mapPublicIdAvailability")
-    Availability toEntity(AvailabilityModel model);
+    @Mapping(target = "publicId", source = "publicId", qualifiedByName = "mapPublicIdPeriod")
+    Period toEntity(PeriodModel model);
 
-    @Named("mapPublicIdAvailability")
+    @Named("mapPublicIdPeriod")
     default String mapPublicId(String publicId) {
 	if (publicId == null || publicId.isBlank()) {
 	    return generatePublicId();

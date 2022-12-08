@@ -73,9 +73,10 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 
     public Mono<ServiceProviderModel> create(ServiceProviderModel model) {
 	var serviceProvider = mapper.toEntity(model);
-	serviceProvider.setPublicId(generatePublicId());
 
 	return save(serviceProvider, false)
+		// Fetch all including attached entities
+		.flatMap(p -> findByPublicId(p.getPublicId()))
 		.map(mapper::toModel);
     }
 
@@ -93,6 +94,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 			    p.setId(r.getId());
 			    p.setCreated(r.getCreated());
 			    p.setModified(r.getModified());
+			    p.setVersion(r.getVersion());
 
 			    return p;
 			}))
@@ -150,7 +152,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		})
 		// Save the service provider
 		.flatMap(p -> save(p, true))
-		// Fetch all including not updated
+		// Fetch all including attached entities
 		.flatMap(p -> findByPublicId(p.getPublicId()))
 		.map(mapper::toModel);
     }
@@ -206,7 +208,8 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
     }
 
     public Flux<Schedule> findSchedules(String publicId, LocalDateTime begin, LocalDateTime end) {
-	scheduleRepository.findBy(null)
+	// scheduleRepository.findBy(null)
+	return null;
     }
 
     /**
@@ -221,8 +224,9 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 	if (serviceProvider.getAmSlots() == null || serviceProvider.getAmSlots().isEmpty()
 		|| serviceProvider.getPmSlots() == null || serviceProvider.getPmSlots().isEmpty()) {
 
-	    if (!update)
+	    if (!update) {
 		return Mono.error(new ServiceProviderException("Missing slot information"));
+	    }
 	} else {
 	    slots.addAll(serviceProvider.getAmSlots());
 	    slots.addAll(serviceProvider.getPmSlots());
@@ -232,7 +236,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		// Save contact and return
 		.flatMap(p -> {
 		    if (p.getContact() == null) {
-			// If its update and no contact return
+			// If its update and no contact, return
 			if (update) {
 			    return Mono.just(p);
 			} else {
@@ -250,7 +254,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		// Parse and set off days
 		.flatMap(p -> {
 		    if (p.getOffDays() == null) {
-			// If its update and no off days return
+			// If its update and no off days, return
 			if (update) {
 			    return Mono.just(p);
 			} else {
@@ -266,7 +270,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		// Parse and set service types
 		.flatMap(p -> {
 		    if (p.getServiceTypes() == null) {
-			// If its update and no service types return
+			// If its update and no service types, return
 			if (update) {
 			    return Mono.just(p);
 			} else {
@@ -274,7 +278,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 			}
 		    }
 
-		    serviceProvider.setServiceTypesJSON(JSONUtils.objectToJSON(serviceProvider.getServiceTypes()));
+		    serviceProvider.setServiceTypesJSON(JSONUtils.serviceTypeToJSON(serviceProvider.getServiceTypes()));
 
 		    return Mono.just(p);
 		})
@@ -282,12 +286,17 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		.flatMap(p -> repository.save(p))
 		// Save slots and return
 		.flatMap(p -> {
-		    // If its update mode and no slots return
+		    // If its update mode and no slots, return
 		    if (update && slots.isEmpty())
 			return Mono.just(p);
 
 		    return Mono.just(slots)
 			    .flatMapMany(Flux::fromIterable)
+			    .map(s -> {
+				s.setValidDaysJSON(JSONUtils.objectToJSON(s.getValidDays()));
+
+				return s;
+			    })
 			    .flatMap(slot -> slotRepository.save(slot))
 			    .flatMap(slot -> providerSlotRepository.saveServiceProviderSlot(p, slot))
 			    .then(Mono.just(p));
@@ -295,7 +304,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		// Save availability and return
 		.flatMap(p -> {
 		    if (p.getAvailability() == null)
-			// If its update and no availability info return
+			// If its update and no availability info, return
 			if (update)
 			    Mono.just(p);
 			else

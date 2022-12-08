@@ -16,13 +16,13 @@ public interface BaseMapper<E extends BaseEntity, M extends BaseModel> {
 
     M toModel(E e);
 
-    @Mapping(target = "publicId", source = "publicId", qualifiedByName = "publicIdMapping")
+    @Mapping(target = "publicId", source = "publicId", qualifiedByName = "mapPublicId")
     E toEntity(M m);
 
     Collection<M> toModel(Collection<E> e);
-
-    @Named("publicIdMapping")
-    default String map(String publicId) {
+    
+    @Named("mapPublicId")
+    default String mapPublicId(String publicId) {
 	if (publicId == null || publicId.isBlank()) {
 	    return generatePublicId();
 	}

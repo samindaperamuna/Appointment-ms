@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.Set;
 
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.relational.core.mapping.Table;
 
 import lombok.Data;
@@ -45,4 +46,7 @@ public class ServiceProvider extends AuditedEntity {
 
     @Transient
     private Set<Availability> availability;
+    
+    @Version
+    private long version;
 }

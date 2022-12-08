@@ -7,17 +7,17 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import ms.asp.appointment.domain.Availability;
-import ms.asp.appointment.model.AvailabilityModel;
+import ms.asp.appointment.domain.Note;
+import ms.asp.appointment.model.NoteModel;
 
 @Mapper(config = BaseMapper.class)
-public interface AvailabilityMapper extends BaseMapper<Availability, AvailabilityModel> {
+public interface NoteMapper extends BaseMapper<Note, NoteModel> {
 
     @InheritConfiguration
-    @Mapping(target = "publicId", source = "publicId", qualifiedByName = "mapPublicIdAvailability")
-    Availability toEntity(AvailabilityModel model);
+    @Mapping(target = "publicId", source = "publicId", qualifiedByName = "mapPublicIdNote")
+    Note toEntity(NoteModel model);
 
-    @Named("mapPublicIdAvailability")
+    @Named("mapPublicIdNote")
     default String mapPublicId(String publicId) {
 	if (publicId == null || publicId.isBlank()) {
 	    return generatePublicId();

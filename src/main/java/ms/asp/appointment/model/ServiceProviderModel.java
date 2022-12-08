@@ -35,8 +35,8 @@ public class ServiceProviderModel extends BaseModel {
     private boolean hasDescription;
 
     private Set<DayOfWeek> offDays;
-    private Set<ServiceProviderSlotModel> amSlots;
-    private Set<ServiceProviderSlotModel> pmSlots;
+    private Set<SlotModel> amSlots;
+    private Set<SlotModel> pmSlots;
     private Set<ServiceType> serviceTypes;
     private Set<AvailabilityModel> availability;
 }

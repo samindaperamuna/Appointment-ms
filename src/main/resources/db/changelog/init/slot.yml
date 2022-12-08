@@ -21,16 +21,19 @@ databaseChangeLog:
             type: VARCHAR(50)
         - column:
             name: START
-            type: DATETIME
+            type: TIME
         - column:
             name: END
-            type: DATETIME         
+            type: TIME         
         - column:
             name: OVERBOOKED
             type: BOOLEAN
         - column:
-            name: SCHEDULE_ID
-            type: INT
+            name: VALID_DAYS_JSON
+            type: JSON
+        - column:
+            name: WHOLE_WEEK
+            type: BOOLEAN
         - column:
             name: COMMENT
             type: VARCHAR(500)

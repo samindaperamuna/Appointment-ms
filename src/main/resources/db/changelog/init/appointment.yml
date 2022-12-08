@@ -44,12 +44,6 @@ databaseChangeLog:
             name: SUPPORTING_INFORMATION
             type: VARCHAR(500)
         - column:
-            name: START
-            type: DATETIME
-        - column:
-            name: END
-            type: DATETIME
-        - column:
             name: MINUTES_DURATION
             type: INT
         - column:

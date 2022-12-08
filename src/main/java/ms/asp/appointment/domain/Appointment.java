@@ -1,6 +1,5 @@
 package ms.asp.appointment.domain;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 import org.springframework.data.annotation.Transient;
@@ -20,8 +19,6 @@ public class Appointment extends AuditedEntity {
     private int priority;
     private String description;
     private String supportingInformation;
-    private LocalDateTime start;
-    private LocalDateTime end;
     private int minutesDuration;
     private String comment;
     private String patientInstruction;
@@ -40,9 +37,6 @@ public class Appointment extends AuditedEntity {
 
     @Transient
     private Set<Appointment> replaces;
-
-    @Transient
-    private Set<Slot> slots;
 
     @Transient
     private Set<Note> notes;

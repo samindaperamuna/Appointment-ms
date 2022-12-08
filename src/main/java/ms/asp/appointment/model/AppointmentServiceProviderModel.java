@@ -11,7 +11,12 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ServiceProviderSlotModel extends BaseSlotModel {
+public class AppointmentServiceProviderModel extends BaseModel {
+
+    private String subTitle;
+    private String location;
+    private ContactModel contact;
+    private double price;
 
     @DateTimeFormat(pattern = "HH:mm")
     @JsonFormat(pattern = "HH:mm")
@@ -20,4 +25,6 @@ public class ServiceProviderSlotModel extends BaseSlotModel {
     @DateTimeFormat(pattern = "HH:mm")
     @JsonFormat(pattern = "HH:mm")
     private LocalTime end;
+
+    private boolean active;
 }

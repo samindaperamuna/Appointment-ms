@@ -30,8 +30,6 @@ public class SlotRepositoryTest {
 	Slot slot = new Slot();
 	LocalDateTime start = LocalDateTime.parse("2022-11-30 10:30", formatter);
 	LocalDateTime end = LocalDateTime.parse("2022-11-30 11:00", formatter);
-	slot.setStart(start);
-	slot.setEnd(end);
 	slot.setComment("This is a detached slot");
 	
 	this.slotRepository.save(slot)

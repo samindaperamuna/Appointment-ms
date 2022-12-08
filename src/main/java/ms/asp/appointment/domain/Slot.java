@@ -1,6 +1,8 @@
 package ms.asp.appointment.domain;
 
-import java.time.LocalDateTime;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.util.Set;
 
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
@@ -14,12 +16,14 @@ import lombok.EqualsAndHashCode;
 public class Slot extends BaseEntity {
 
     private String status;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalTime start;
+    private LocalTime end;
     private boolean overbooked;
     private String comment;
 
     @Transient
-    private Schedule schedule;
-    private Long scheduleId;
+    private Set<DayOfWeek> validDays;
+    private String validDaysJSON;
+
+    private boolean wholeWeek;
 }

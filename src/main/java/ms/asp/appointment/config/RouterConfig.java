@@ -42,7 +42,7 @@ public class RouterConfig {
 		.andRoute(POST("/serviceproviders"), serviceProviderHandler::create)
 		.andRoute(PUT("/serviceproviders"), serviceProviderHandler::update)
 		.andRoute(DELETE("/serviceproviders/{publicId}"), serviceProviderHandler::delete)
-		.andRoute(GET("/serviceproviders/{publicId}/schedule"), serviceProviderHandler::schedule)
+		// .andRoute(GET("/serviceproviders/{publicId}/schedule"), serviceProviderHandler::schedule)
 	
 		// AppointmentFlow
         	.andRoute(GET("/appointmentflows"), appointmentFlowHandler::all)

@@ -63,8 +63,6 @@ public class ServiceProviderRepositoryTest {
 	Slot slot = new Slot();
 	LocalDateTime start = LocalDateTime.parse("2022-11-30 10:30", formatter);
 	LocalDateTime end = LocalDateTime.parse("2022-11-30 11:00", formatter);
-	slot.setStart(start);
-	slot.setEnd(end);
 
 	this.serviceProviderRepository.save(provider)
 		.flatMap(p -> {

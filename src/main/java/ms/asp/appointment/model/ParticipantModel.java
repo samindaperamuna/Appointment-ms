@@ -6,7 +6,10 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ParticipantModel extends BaseModel {
-    private String name;
-    private ContactModel contact;
+
     private String type;
+    private boolean required;
+    private String status;
+
+    private ParticipantInfoModel participantInfo;
 }

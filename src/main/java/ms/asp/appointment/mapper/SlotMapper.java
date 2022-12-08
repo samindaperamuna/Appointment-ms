@@ -7,17 +7,17 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import ms.asp.appointment.domain.Availability;
-import ms.asp.appointment.model.AvailabilityModel;
+import ms.asp.appointment.domain.Slot;
+import ms.asp.appointment.model.SlotModel;
 
 @Mapper(config = BaseMapper.class)
-public interface AvailabilityMapper extends BaseMapper<Availability, AvailabilityModel> {
+public interface SlotMapper extends BaseMapper<Slot, SlotModel> {
 
     @InheritConfiguration
-    @Mapping(target = "publicId", source = "publicId", qualifiedByName = "mapPublicIdAvailability")
-    Availability toEntity(AvailabilityModel model);
+    @Mapping(target = "publicId", source = "publicId", qualifiedByName = "mapPublicIdSlot")
+    Slot toEntity(SlotModel model);
 
-    @Named("mapPublicIdAvailability")
+    @Named("mapPublicIdSlot")
     default String mapPublicId(String publicId) {
 	if (publicId == null || publicId.isBlank()) {
 	    return generatePublicId();
