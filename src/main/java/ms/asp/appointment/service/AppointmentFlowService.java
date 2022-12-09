@@ -33,15 +33,15 @@ public class AppointmentFlowService extends AbstractService<AppointmentFlow, Lon
 		.map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
+    public Mono<AppointmentFlowModel> findOne(String publicId) {
+	return findByPublicId(publicId)
+		.map(mapper::toModel);
+    }
+    
     public Mono<AppointmentFlowModel> create(AppointmentFlowModel model) {
 	var appointmentFlow = mapper.toEntity(model);
 
 	return save(appointmentFlow, false)
-		.map(mapper::toModel);
-    }
-
-    public Mono<AppointmentFlowModel> findOne(String publicId) {
-	return findByPublicId(publicId)
 		.map(mapper::toModel);
     }
 

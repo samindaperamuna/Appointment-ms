@@ -6,6 +6,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,17 +72,26 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 	this.scheduleRepository = scheduleRepository;
     }
 
+    public Mono<Page<ServiceProviderModel>> findByPage(PageRequest pageRequest) {
+	return this.repository.findBy(pageRequest)
+		.flatMap(p -> findByPublicId(p.getPublicId()))
+		.map(mapper::toModel)
+		.collectList()
+		.zipWith(this.repository.count())
+		.map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
+    }
+
+    public Mono<ServiceProviderModel> findOne(String publicId) {
+	return findByPublicId(publicId)
+		.map(mapper::toModel);
+    }
+
     public Mono<ServiceProviderModel> create(ServiceProviderModel model) {
 	var serviceProvider = mapper.toEntity(model);
 
 	return save(serviceProvider, false)
 		// Fetch all including attached entities
 		.flatMap(p -> findByPublicId(p.getPublicId()))
-		.map(mapper::toModel);
-    }
-
-    public Mono<ServiceProviderModel> findOne(String publicId) {
-	return findByPublicId(publicId)
 		.map(mapper::toModel);
     }
 

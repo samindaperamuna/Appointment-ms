@@ -5,6 +5,9 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.mapstruct.Mapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,17 +87,26 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	this.historyMapper = historyMapper;
     }
 
+    public Mono<Page<AppointmentModel>> findByPage(PageRequest pageRequest) {
+	return this.repository.findBy(pageRequest)
+		.flatMap(a -> findByPublicId(a.getPublicId()))
+		.map(mapper::toModel)
+		.collectList()
+		.zipWith(this.repository.count())
+		.map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
+    }
+
+    public Mono<AppointmentModel> findOne(String publicId) {
+	return findByPublicId(publicId)
+		.map(mapper::toModel);
+    }
+
     public Mono<AppointmentModel> create(AppointmentModel model) {
 	var appointment = mapper.toEntity(model);
 
 	return save(appointment, false)
 		// Fetch all including attached entities
 		.flatMap(p -> findByPublicId(p.getPublicId()))
-		.map(mapper::toModel);
-    }
-
-    public Mono<AppointmentModel> findOne(String publicId) {
-	return findByPublicId(publicId)
 		.map(mapper::toModel);
     }
 
