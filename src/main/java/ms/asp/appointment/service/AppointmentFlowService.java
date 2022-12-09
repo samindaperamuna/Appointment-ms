@@ -1,5 +1,8 @@
 package ms.asp.appointment.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +23,14 @@ public class AppointmentFlowService extends AbstractService<AppointmentFlow, Lon
 	    AppointmentFlowMapper mapper) {
 
 	super(repository, mapper);
+    }
+
+    public Mono<Page<AppointmentFlowModel>> findByPage(PageRequest pageRequest) {
+	return this.repository.findBy(pageRequest)
+		.map(mapper::toModel)
+		.collectList()
+		.zipWith(this.repository.count())
+		.map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
     public Mono<AppointmentFlowModel> create(AppointmentFlowModel model) {
