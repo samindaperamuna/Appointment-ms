@@ -1,6 +1,6 @@
 package ms.asp.appointment.domain;
 
-import java.util.Set;
+import java.util.List;
 
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
@@ -17,7 +17,7 @@ public class Schedule extends BaseEntity {
     private String comment;
 
     @Transient
-    private Set<ParticipantInfo> participantInfo;
+    private List<ParticipantInfo> participantInfo;
     @Transient
     private Period planningHorizon;
 }

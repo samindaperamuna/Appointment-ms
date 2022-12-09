@@ -2,7 +2,7 @@ package ms.asp.appointment.model;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.Set;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -25,6 +25,6 @@ public class SlotModel extends BaseModel {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime end;
 
-    private Set<DayOfWeek> validDays;
-    private boolean wholeWeek;
+    private List<DayOfWeek> validDays;
+    private boolean wholeWeek;	
 }

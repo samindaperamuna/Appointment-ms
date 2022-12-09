@@ -6,6 +6,7 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,7 +56,7 @@ public class ServiceProviderRepositoryTest {
 
 	provider.setOffDaysJSON(JSONUtils.objectToJSON(offDays));
 
-	Set<ServiceType> serviceTypes = new HashSet<>();
+	List<ServiceType> serviceTypes = new ArrayList<>();
 	serviceTypes.addAll(List.of(ServiceType.GYNOCOLOGIST, ServiceType.MEDICINCE));
 
 	provider.setServiceTypesJSON(JSONUtils.serviceTypeToJSON(serviceTypes));

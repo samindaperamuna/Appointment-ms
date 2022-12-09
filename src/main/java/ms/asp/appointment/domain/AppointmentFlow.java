@@ -1,6 +1,6 @@
 package ms.asp.appointment.domain;
 
-import java.util.Set;
+import java.util.List;
 
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
@@ -18,6 +18,6 @@ public class AppointmentFlow extends AuditedEntity {
     private AppointmentType appointmentType;
 
     @Transient
-    private Set<ServiceType> serviceTypes;
+    private List<ServiceType> serviceTypes;
     private String serviceTypeJSON;
 }

@@ -6,12 +6,9 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import lombok.RequiredArgsConstructor;
-import ms.asp.appointment.domain.Schedule;
-import ms.asp.appointment.exception.AppointmentException;
 import ms.asp.appointment.exception.ServiceProviderException;
 import ms.asp.appointment.model.ServiceProviderModel;
 import ms.asp.appointment.service.ServiceProviderService;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component

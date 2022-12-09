@@ -52,7 +52,7 @@ public class ServiceProviderSlotRepository {
 	    + " INNER JOIN SERVICE_PROVIDER as sp ON sps.SERVICE_PROVIDER_ID = sp.ID"
 	    + " INNER JOIN SLOT as s ON sps.SLOT_ID = s.ID"
 	    + " WHERE sps.SERVICE_PROVIDER_ID LIKE :id"
-	    + " AND TIME(s.START) BETWEEN :startTime AND ADDTIME(:startTime, '12:00')";
+	    + " AND TIME(s.START) BETWEEN :startTime AND ADDTIME(:startTime, '12:00') ORDER BY s.START";
 
     public Mono<Long> saveServiceProviderSlot(ServiceProvider provider, Slot slot) {
 	return databaseClient.sql(INSERT_SQL)

@@ -15,6 +15,7 @@ import ms.asp.appointment.domain.Contact;
 import ms.asp.appointment.domain.ParticipantInfo;
 import ms.asp.appointment.exception.AppointmentException;
 import ms.asp.appointment.exception.NotFoundException;
+import ms.asp.appointment.mapper.AppointmentHistoryMapper;
 import ms.asp.appointment.mapper.AppointmentMapper;
 import ms.asp.appointment.mapper.PeriodMapper;
 import ms.asp.appointment.model.AppointmentModel;
@@ -47,6 +48,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
     private final PeriodRepository periodRepository;
 
     private final PeriodMapper periodMapper;
+    private final AppointmentHistoryMapper historyMapper;
 
     /**
      * Pass in the repository and the mapper to the super class.
@@ -65,7 +67,8 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	    ServiceProviderRepository serviceProviderRepository,
 	    PeriodRepository periodRepository,
 	    AppointmentMapper mapper,
-	    PeriodMapper periodMapper) {
+	    PeriodMapper periodMapper,
+	    AppointmentHistoryMapper historyMapper) {
 
 	super(repository, mapper);
 
@@ -78,6 +81,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	this.serviceProviderRepository = serviceProviderRepository;
 	this.periodRepository = periodRepository;
 	this.periodMapper = periodMapper;
+	this.historyMapper = historyMapper;
     }
 
     public Mono<AppointmentModel> create(AppointmentModel model) {
@@ -189,10 +193,13 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 			    });
 		})
 		// Save appointment history
-		.flatMap(a -> {
-		    return historyRepository.save(((AppointmentMapper) mapper).toHistory(a))
-			    .then(Mono.just(a));
-		})
+		.flatMap(a -> findByPublicId(a.getPublicId())
+			.flatMap(old -> {
+			    var history = historyMapper.toHistory(old);
+			    history.setId(null);
+
+			    return historyRepository.save(history).then(Mono.just(a));
+			}))
 		// Save the appointment
 		.flatMap(a -> save(a, true))
 		// Fetch all including attached entities
@@ -203,16 +210,13 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
     public Mono<AppointmentModel> delete(String publicId) {
 	var e = new NotFoundException("No Appointement has id = " + publicId);
 
-	repository.findByPublicId(publicId)
-		.map(a -> {
-		    return historyRepository.save(((AppointmentMapper) mapper).toHistory(a));
-		})
-		.switchIfEmpty(Mono.error(e))
-		.subscribe();
+	return repository.findByPublicId(publicId)
+		.flatMap(a -> historyRepository.save(historyMapper.toHistory(a))
+			.then(Mono.just(a)))
+		.flatMap(a -> repository.deleteByPublicId(a.getPublicId())
+			.switchIfEmpty(Mono.error(e))
+			.map(mapper::toModel));
 
-	return repository.deleteByPublicId(publicId)
-		.switchIfEmpty(Mono.error(e))
-		.map(mapper::toModel);
     }
 
     /**
@@ -226,11 +230,17 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	var e = new NotFoundException("No Appointement has id = " + publicId);
 
 	return repository.findByPublicId(publicId)
+		// Save history
+		.flatMap(old -> historyRepository.save(historyMapper.toHistory(old))
+			.then(Mono.just(old)))
+		// Update period
 		.map(a -> {
 		    a.setPeriod(periodMapper.toEntity(periodModel));
 
 		    return a;
 		})
+		// Save the appointment
+		.flatMap(a -> save(a, true))
 		.switchIfEmpty(Mono.error(e))
 		.map(mapper::toModel);
     }
@@ -407,7 +417,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 		// Set notes and return
 		.flatMap(a -> {
 		    return appointmentNoteRepository.findNotes(a, 5)
-			    .collect(Collectors.toSet())
+			    .collectList()
 			    .map(notes -> {
 				a.setNotes(notes);
 
@@ -440,7 +450,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 					    return p;
 					});
 			    })
-			    .collect(Collectors.toSet())
+			    .collectList()
 			    .map(parts -> {
 				a.setParticipants(parts);
 

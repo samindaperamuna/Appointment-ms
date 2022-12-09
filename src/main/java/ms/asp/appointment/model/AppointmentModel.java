@@ -1,7 +1,7 @@
 package ms.asp.appointment.model;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -27,9 +27,9 @@ public class AppointmentModel extends BaseModel {
     private String comment;
     private String patientInstruction;
 
-    private Set<AppointmentModel> replaces;
-    private Set<NoteModel> notes;
-    private Set<ParticipantModel> participants;
+    private List<AppointmentModel> replaces;
+    private List<NoteModel> notes;
+    private List<ParticipantModel> participants;
     
     private PeriodModel requestedPeriod;
     

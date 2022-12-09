@@ -1,6 +1,6 @@
 package ms.asp.appointment.model;
 
-import java.util.Set;
+import java.util.List;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,5 +13,5 @@ public class AppointmentFlowModel extends BaseModel {
 
     private String description;
     private AppointmentType appointmentType;
-    private Set<ServiceType> serviceType;
+    private List<ServiceType> serviceTypes;
 }

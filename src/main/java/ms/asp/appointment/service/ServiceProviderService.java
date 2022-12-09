@@ -1,7 +1,5 @@
 package ms.asp.appointment.service;
 
-import static ms.asp.appointment.util.CommonUtils.generatePublicId;
-
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -353,7 +351,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		// Set AM slots and return
 		.flatMap(p -> {
 		    return providerSlotRepository.findAMSlots(p, 10)
-			    .collect(Collectors.toSet())
+			    .collectList()
 			    .map(slots -> {
 				p.setAmSlots(slots);
 
@@ -364,7 +362,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		// Set PM slots and return
 		.flatMap(p -> {
 		    return providerSlotRepository.findPMSlots(p, 10)
-			    .collect(Collectors.toSet())
+			    .collectList()
 			    .map(s -> {
 				p.setPmSlots(s);
 
@@ -374,7 +372,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		// Set availability
 		.flatMap(p -> {
 		    return providerAvailabilityRepository.findAvailability(p, 10)
-			    .collect(Collectors.toSet())
+			    .collectList()
 			    .map(a -> {
 				p.setAvailability(a);
 

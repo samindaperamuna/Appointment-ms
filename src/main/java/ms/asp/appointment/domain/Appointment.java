@@ -1,6 +1,6 @@
 package ms.asp.appointment.domain;
 
-import java.util.Set;
+import java.util.List;
 
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.annotation.Version;
@@ -36,13 +36,13 @@ public class Appointment extends AuditedEntity {
     private Long reasonId;
 
     @Transient
-    private Set<Appointment> replaces;
+    private List<Appointment> replaces;
 
     @Transient
-    private Set<Note> notes;
+    private List<Participant> participants;
 
     @Transient
-    private Set<Participant> participants;
+    private List<Note> notes;
 
     @Transient
     private Period period;

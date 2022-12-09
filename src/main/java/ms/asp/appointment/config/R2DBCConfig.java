@@ -17,6 +17,8 @@ import ms.asp.appointment.domain.converter.CancellationReasonReader;
 import ms.asp.appointment.domain.converter.CancellationReasonWriter;
 import ms.asp.appointment.domain.converter.ServiceCategoryReader;
 import ms.asp.appointment.domain.converter.ServiceCategoryWriter;
+import ms.asp.appointment.domain.converter.ServiceTypeReader;
+import ms.asp.appointment.domain.converter.ServiceTypeWriter;
 import ms.asp.appointment.domain.converter.SpecialityReader;
 import ms.asp.appointment.domain.converter.SpecialityWriter;
 
@@ -44,6 +46,8 @@ public class R2DBCConfig extends AbstractR2dbcConfiguration {
 		new SpecialityReader(),
 		new SpecialityWriter(),
 		new AvailabilityTypeReader(),
-		new AvailabilityTypeWriter());
+		new AvailabilityTypeWriter(),
+		new ServiceTypeReader(),
+		new ServiceTypeWriter());
     }
 }

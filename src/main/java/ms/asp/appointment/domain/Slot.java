@@ -2,7 +2,7 @@ package ms.asp.appointment.domain;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.Set;
+import java.util.List;
 
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
@@ -22,7 +22,7 @@ public class Slot extends BaseEntity {
     private String comment;
 
     @Transient
-    private Set<DayOfWeek> validDays;
+    private List<DayOfWeek> validDays;
     private String validDaysJSON;
 
     private boolean wholeWeek;

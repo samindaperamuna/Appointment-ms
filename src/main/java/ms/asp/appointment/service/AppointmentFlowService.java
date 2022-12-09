@@ -76,7 +76,8 @@ public class AppointmentFlowService extends AbstractService<AppointmentFlow, Lon
 		    f.setServiceTypeJSON(JSONUtils.serviceTypeToJSON(f.getServiceTypes()));
 
 		    return Mono.just(f);
-		});
+		})
+		.flatMap(repository::save);
     }
 
     private Mono<AppointmentFlow> findByPublicId(String publicId) {

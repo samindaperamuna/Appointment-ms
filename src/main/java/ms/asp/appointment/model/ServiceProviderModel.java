@@ -2,7 +2,7 @@ package ms.asp.appointment.model;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.Set;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -34,9 +34,9 @@ public class ServiceProviderModel extends BaseModel {
     private int ordersPerDaySlot;
     private boolean hasDescription;
 
-    private Set<DayOfWeek> offDays;
-    private Set<SlotModel> amSlots;
-    private Set<SlotModel> pmSlots;
-    private Set<ServiceType> serviceTypes;
-    private Set<AvailabilityModel> availability;
+    private List<DayOfWeek> offDays;
+    private List<SlotModel> amSlots;
+    private List<SlotModel> pmSlots;
+    private List<ServiceType> serviceTypes;
+    private List<AvailabilityModel> availability;
 }

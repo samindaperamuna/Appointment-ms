@@ -35,8 +35,11 @@ databaseChangeLog:
             name: SUPPORTING_INFORMATION
             type: VARCHAR(500)
         - column:
-            name: SERVICE_PROVIDER_ID
-            type: INT
+            name: START
+            type: DATETIME
+        - column:
+            name: END
+            type: DATETIME
         - column:
             name: SERVICE_CATEGORY
             type: VARCHAR(50)
@@ -59,8 +62,14 @@ databaseChangeLog:
             name: REASON_ID
             type: INT
         - column:
-            name: PERIOD_ID
-            type: INT
+            name: SERVICE_PROVIDER_JSON
+            type: JSON
+        - column:
+            name: PARTICIPANTS_JSON
+            type: JSON
+        - column:
+            name: NOTES_JSON
+            type: JSON
         - column:
             name: CREATED
             type: DATETIME

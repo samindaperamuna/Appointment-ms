@@ -1,5 +1,7 @@
 package ms.asp.appointment.config.filter;
 
+import static ms.asp.appointment.util.CommonUtils.value;
+
 import java.util.List;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -15,8 +17,6 @@ import ms.asp.appointment.config.interceptor.RequestLoggingInterceptor;
 import ms.asp.appointment.config.interceptor.ResponseLoggingInterceptor;
 import ms.asp.appointment.util.UniqueIDGenerator;
 import reactor.core.publisher.Mono;
-
-import static ms.asp.appointment.util.CommonUtils.value;
 
 @AllArgsConstructor
 @Slf4j

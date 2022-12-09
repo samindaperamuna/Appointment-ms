@@ -1,8 +1,8 @@
 package ms.asp.appointment.util;
 
 import java.time.DayOfWeek;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
 import ms.asp.appointment.domain.ServiceType;
@@ -19,6 +20,10 @@ import ms.asp.appointment.domain.ServiceType;
 public class JSONUtils {
 
     private final static ObjectMapper mapper = new ObjectMapper();
+
+    static {
+	mapper.registerModule(new JavaTimeModule());
+    }
 
     public static String objectToJSON(Object object) {
 	try {
@@ -48,23 +53,25 @@ public class JSONUtils {
 	return object;
     }
 
-    public static String serviceTypeToJSON(Set<ServiceType> serviceTypes) {
-	Set<String> set = new HashSet<>();
+    public static String serviceTypeToJSON(List<ServiceType> serviceTypes) {
+	List<String> list = new ArrayList<>();
 
 	for (ServiceType enumeration : serviceTypes) {
-	    set.add(enumeration.getValue());
+	    list.add(enumeration.getValue());
 	}
 
-	return objectToJSON(set);
+	return objectToJSON(list);
     }
 
     @SuppressWarnings("unchecked")
-    public static Set<ServiceType> jsonToServiceType(String json) {
-	return (Set<ServiceType>) jsonToObject(json, new TypeReference<Set<ServiceType>>() {});
+    public static List<ServiceType> jsonToServiceType(String json) {
+	return (List<ServiceType>) jsonToObject(json, new TypeReference<List<ServiceType>>() {
+	});
     }
-    
+
     @SuppressWarnings("unchecked")
-    public static Set<DayOfWeek> jsonToOffDays(String json) {
-	return (Set<DayOfWeek>) jsonToObject(json, new TypeReference<Set<DayOfWeek>>() {});
+    public static List<DayOfWeek> jsonToOffDays(String json) {
+	return (List<DayOfWeek>) jsonToObject(json, new TypeReference<List<DayOfWeek>>() {
+	});
     }
 }
