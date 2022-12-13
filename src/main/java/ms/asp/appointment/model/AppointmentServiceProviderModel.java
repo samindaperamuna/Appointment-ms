@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ms.asp.appointment.util.CommonUtils;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -18,12 +19,12 @@ public class AppointmentServiceProviderModel extends BaseModel {
     private ContactModel contact;
     private double price;
 
-    @DateTimeFormat(pattern = "HH:mm")
-    @JsonFormat(pattern = "HH:mm")
+    @DateTimeFormat(pattern = CommonUtils.TIME_FORMAT)
+    @JsonFormat(pattern = CommonUtils.TIME_FORMAT)
     private LocalTime start;
 
-    @DateTimeFormat(pattern = "HH:mm")
-    @JsonFormat(pattern = "HH:mm")
+    @DateTimeFormat(pattern = CommonUtils.TIME_FORMAT)
+    @JsonFormat(pattern = CommonUtils.TIME_FORMAT)
     private LocalTime end;
 
     private boolean active;

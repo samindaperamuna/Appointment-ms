@@ -12,18 +12,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ms.asp.appointment.domain.Schedule;
 import ms.asp.appointment.domain.ServiceProvider;
 import ms.asp.appointment.domain.Slot;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.exception.ServiceProviderException;
 import ms.asp.appointment.mapper.ServiceProviderMapper;
+import ms.asp.appointment.model.Schedule;
 import ms.asp.appointment.model.ServiceProviderModel;
 import ms.asp.appointment.repository.AppointmentRepository;
 import ms.asp.appointment.repository.AvailabilityRepository;
 import ms.asp.appointment.repository.BaseRepository;
 import ms.asp.appointment.repository.ContactRepository;
-import ms.asp.appointment.repository.ScheduleRepository;
 import ms.asp.appointment.repository.ServiceProviderAvailabilityRepository;
 import ms.asp.appointment.repository.ServiceProviderRepository;
 import ms.asp.appointment.repository.ServiceProviderSlotRepository;
@@ -42,7 +41,6 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
     private final ServiceProviderSlotRepository providerSlotRepository;
     private final AvailabilityRepository availabilityRepository;
     private final ServiceProviderAvailabilityRepository providerAvailabilityRepository;
-    private final ScheduleRepository scheduleRepository;
 
     /**
      * Pass in the repository and the mapper to the super class.
@@ -58,7 +56,6 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 	    ServiceProviderSlotRepository providerSlotRepository,
 	    AvailabilityRepository availabilityRepository,
 	    ServiceProviderAvailabilityRepository providerAvailabilityRepository,
-	    ScheduleRepository scheduleRepository,
 	    ServiceProviderMapper mapper) {
 
 	super(repository, mapper);
@@ -69,7 +66,6 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 	this.providerSlotRepository = providerSlotRepository;
 	this.availabilityRepository = availabilityRepository;
 	this.providerAvailabilityRepository = providerAvailabilityRepository;
-	this.scheduleRepository = scheduleRepository;
     }
 
     public Mono<Page<ServiceProviderModel>> findByPage(PageRequest pageRequest) {
@@ -217,7 +213,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		}).map(mapper::toModel);
     }
 
-    public Flux<Schedule> findSchedules(String publicId, LocalDateTime begin, LocalDateTime end) {
+    public Flux<Schedule> findSchedule(String publicId, LocalDateTime begin, LocalDateTime end) {
 	// scheduleRepository.findBy(null)
 	return null;
     }

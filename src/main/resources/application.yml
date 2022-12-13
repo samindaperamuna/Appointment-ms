@@ -1,6 +1,11 @@
 server.port: 8080
 server.error.include-message: always
 
+springdoc.api-docs.enabled: true
+springdoc.api-docs.groups.enabled: true
+springdoc.swagger-ui.path: /swagger/swagger-ui.html
+springdoc.api-docs.path: /swagger/v3/api-docs
+
 spring:
   application.name: appointment-ms
   webflux.base-path: /api/v1/
@@ -14,7 +19,7 @@ spring:
   reactor:
     debug-agent:
       enabled: true
-    
+      
 logging:
   level:
     '[reactor.netty.http.client]': DEBUG

@@ -1,62 +1,127 @@
 {"properties": [
   {
-    "name": "service.base-url",
-    "type": "java.lang.String",
-    "description": "A description for 'service.base-url'"
-  },
-  {
-    "name": "service.idTemplate",
-    "type": "java.lang.String",
-    "description": "A description for 'service.idTemplate'"
-  },
-  {
-    "name": "service.endpoints.all",
-    "type": "java.lang.String",
-    "description": "A description for 'service.endpoints.all'"
-  },
-  {
-    "name": "service.endpoints.byId",
-    "type": "java.lang.String",
-    "description": "A description for 'service.endpoints.byId'"
-  },
-  {
-    "name": "service.endpoints.create",
-    "type": "java.lang.String",
-    "description": "A description for 'service.endpoints.create'"
-  },
-  {
-    "name": "service.endpoints.update",
-    "type": "java.lang.String",
-    "description": "A description for 'service.endpoints.update'"
-  },
-  {
-    "name": "service.endpoints.delete",
-    "type": "java.lang.String",
-    "description": "A description for 'service.endpoints.delete'"
-  },
-  {
-    "name": "service.endpoints.reschedule",
-    "type": "java.lang.String",
-    "description": "A description for 'service.endpoints.reschedule'"
-  },
-  {
-    "name": "service.endpoints.history",
-    "type": "java.lang.String",
-    "description": "A description for 'service.endpoints.history'"
-  },
-  {
-    "name": "logging.logstash.enabled",
-    "type": "java.lang.String",
-    "description": "A description for 'logging.logstash.enabled'"
-  },
-  {
-    "name": "logging.logstash.url",
-    "type": "java.lang.String",
-    "description": "A description for 'logging.logstash.url'"
-  },
-  {
     "name": "application.reactive-logging-filter.enabled",
     "type": "java.lang.String",
     "description": "A description for 'application.reactive-logging-filter.enabled'"
+  },
+  {
+    "name": "application.endpoints.appointment.get-all",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment.get-all'"
+  },
+  {
+    "name": "application.endpoints.appointment.getOne",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment.getOne'"
+  },
+  {
+    "name": "application.endpoints.appointment.create",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment.create'"
+  },
+  {
+    "name": "application.endpoints.appointment.update",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment.update'"
+  },
+  {
+    "name": "application.endpoints.appointment.delete",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment.delete'"
+  },
+  {
+    "name": "application.endpoints.appointment.history",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment.history'"
+  },
+  {
+    "name": "application.endpoints.appointment.reschedule",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment.reschedule'"
+  },
+  {
+    "name": "application.endpoints.serviceProvider.get-all",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.serviceProvider.get-all'"
+  },
+  {
+    "name": "application.endpoints.serviceProvider.getOne",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.serviceProvider.getOne'"
+  },
+  {
+    "name": "application.endpoints.serviceProvider.create",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.serviceProvider.create'"
+  },
+  {
+    "name": "application.endpoints.serviceProvider.update",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.serviceProvider.update'"
+  },
+  {
+    "name": "application.endpoints.serviceProvider.delete",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.serviceProvider.delete'"
+  },
+  {
+    "name": "application.endpoints.serviceProvider.schedule",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.serviceProvider.schedule'"
+  },
+  {
+    "name": "application.endpoints.service-provider.get-all",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.service-provider.get-all'"
+  },
+  {
+    "name": "application.endpoints.service-provider.getOne",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.service-provider.getOne'"
+  },
+  {
+    "name": "application.endpoints.service-provider.create",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.service-provider.create'"
+  },
+  {
+    "name": "application.endpoints.service-provider.update",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.service-provider.update'"
+  },
+  {
+    "name": "application.endpoints.service-provider.delete",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.service-provider.delete'"
+  },
+  {
+    "name": "application.endpoints.service-provider.schedule",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.service-provider.schedule'"
+  },
+  {
+    "name": "application.endpoints.appointment-flow.get-all",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment-flow.get-all'"
+  },
+  {
+    "name": "application.endpoints.appointment-flow.getOne",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment-flow.getOne'"
+  },
+  {
+    "name": "application.endpoints.appointment-flow.create",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment-flow.create'"
+  },
+  {
+    "name": "application.endpoints.appointment-flow.update",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment-flow.update'"
+  },
+  {
+    "name": "application.endpoints.appointment-flow.delete",
+    "type": "java.lang.String",
+    "description": "A description for 'application.endpoints.appointment-flow.delete'"
   }
 ]}

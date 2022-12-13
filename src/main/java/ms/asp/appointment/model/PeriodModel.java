@@ -8,15 +8,16 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ms.asp.appointment.util.CommonUtils;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PeriodModel extends BaseModel {
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @DateTimeFormat(pattern = CommonUtils.DATE_TIME_FORMAT)
+    @JsonFormat(pattern = CommonUtils.DATE_TIME_FORMAT)
     private LocalDateTime start;
-    
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+
+    @DateTimeFormat(pattern = CommonUtils.DATE_TIME_FORMAT)
+    @JsonFormat(pattern = CommonUtils.DATE_TIME_FORMAT)
     private LocalDateTime end;
 }

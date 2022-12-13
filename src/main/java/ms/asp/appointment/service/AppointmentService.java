@@ -220,13 +220,20 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
     }
 
     public Mono<AppointmentModel> delete(String publicId) {
-	var e = new NotFoundException("No Appointement has id = " + publicId);
-
 	return repository.findByPublicId(publicId)
-		.flatMap(a -> historyRepository.save(historyMapper.toHistory(a))
-			.then(Mono.just(a)))
+		// Save appointment history
+		.flatMap(a -> findByPublicId(a.getPublicId())
+			.switchIfEmpty(Mono.error(new NotFoundException("No Appointement has id = " + publicId)))
+			.flatMap(old -> {
+			    var history = historyMapper.toHistory(old);
+			    history.setId(null);
+			    history.setStatus("DELETED");
+
+			    return historyRepository.save(history).then(Mono.just(a));
+			}))
+		// Delete appointment
 		.flatMap(a -> repository.deleteByPublicId(a.getPublicId())
-			.switchIfEmpty(Mono.error(e))
+			.then(Mono.just(a))
 			.map(mapper::toModel));
 
     }
@@ -239,9 +246,8 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      * @return
      */
     public Mono<AppointmentModel> reschedule(String publicId, @Valid PeriodModel periodModel) {
-	var e = new NotFoundException("No Appointement has id = " + publicId);
-
 	return repository.findByPublicId(publicId)
+		.switchIfEmpty(Mono.error(new NotFoundException("No Appointement has id = " + publicId)))
 		// Save history
 		.flatMap(old -> historyRepository.save(historyMapper.toHistory(old))
 			.then(Mono.just(old)))
@@ -253,7 +259,6 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 		})
 		// Save the appointment
 		.flatMap(a -> save(a, true))
-		.switchIfEmpty(Mono.error(e))
 		.map(mapper::toModel);
     }
 
@@ -295,7 +300,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 
 				return a;
 			    })
-			    .switchIfEmpty(Mono.error(new AppointmentException("Service provider not found!")))
+			    .switchIfEmpty(Mono.error(new NotFoundException("Service provider not found!")))
 			    .then(Mono.just(a));
 		})
 		// Save period if exists else throw an error

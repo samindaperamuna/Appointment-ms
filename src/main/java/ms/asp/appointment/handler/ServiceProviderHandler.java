@@ -1,5 +1,7 @@
 package ms.asp.appointment.handler;
 
+import java.time.LocalDateTime;
+
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
@@ -9,8 +11,10 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import lombok.RequiredArgsConstructor;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.exception.ServiceProviderException;
+import ms.asp.appointment.model.Schedule;
 import ms.asp.appointment.model.ServiceProviderModel;
 import ms.asp.appointment.service.ServiceProviderService;
+import ms.asp.appointment.util.CommonUtils;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -85,10 +89,24 @@ public class ServiceProviderHandler {
 
     public Mono<ServerResponse> getSchedule(ServerRequest req) {
 	var id = req.pathVariable(idTemplate);
+
 	var begin = req.queryParam("begin");
 	var end = req.queryParam("end");
 
-	return ServerResponse.ok().body(null)
+	if (begin.isEmpty()) {
+	    return Mono.error(new NotFoundException("Query parameter 'begin' required"));
+	} else if (CommonUtils.isValidDateTime(begin.get())) {
+	    return Mono.error(new NotFoundException("Query parameter 'begin' needs to be of format: "
+		    + CommonUtils.DATE_TIME_FORMAT));
+	} else if (end.isEmpty()) {
+	    return Mono.error(new NotFoundException("Query parameter 'end' required"));
+	} else if (!NumberUtils.isCreatable(end.get())) {
+	    return Mono.error(new NotFoundException("Query parameter 'end' needs to be of format: "
+		    + CommonUtils.DATE_TIME_FORMAT));
+	}
+
+	return ServerResponse.ok().body(serviceProviderService.findSchedule(id,
+		LocalDateTime.parse(begin.get()), LocalDateTime.parse(end.get())), Schedule.class)
 		.onErrorResume(e -> {
 		    return Mono.error(
 			    new ServiceProviderException("Couldn't fetch schedule for service provider with id: " + id
