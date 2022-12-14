@@ -1,5 +1,6 @@
 package ms.asp.appointment.util;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
@@ -20,7 +21,7 @@ public class CommonUtils {
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
 	try {
-	    formatter.parse(dateTime);
+	    LocalDateTime.parse(dateTime, formatter);
 	} catch (Exception e) {
 	    return false;
 	}

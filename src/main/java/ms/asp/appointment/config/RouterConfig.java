@@ -316,6 +316,24 @@ public class RouterConfig {
 				    @Parameter(in = ParameterIn.QUERY, name = "begin"),
 				    @Parameter(in = ParameterIn.QUERY, name = "end")
 			    })),
+	    @RouterOperation(
+		    path = "/serviceproviders/availability/{type}",
+		    produces = { MediaType.APPLICATION_JSON_VALUE },
+		    method = RequestMethod.GET,
+		    beanClass = ServiceProviderHandler.class,
+		    beanMethod = "getByAvailability",
+		    operation = @Operation(
+			    operationId = "getServiceProviderByAvailability",
+			    responses = {
+				    @ApiResponse(
+					    responseCode = "200",
+					    description = "Successful operation",
+					    content = @Content(
+						    schema = @Schema(implementation = ServiceProviderModel.class))),
+				    @ApiResponse(responseCode = "404", description = "Availability type not found"),
+				    @ApiResponse(responseCode = "400", description = "Couldn't fetch service providers")
+			    },
+			    parameters = { @Parameter(in = ParameterIn.PATH, name = "type") })),
     })
     public RouterFunction<ServerResponse> serviceProviderRoutes() {
 	return RouterFunctions
@@ -324,7 +342,8 @@ public class RouterConfig {
 		.andRoute(POST("/serviceproviders"), serviceProviderHandler::create)
 		.andRoute(PUT("/serviceproviders"), serviceProviderHandler::update)
 		.andRoute(DELETE("/serviceproviders/{publicId}"), serviceProviderHandler::delete)
-		.andRoute(GET("/serviceproviders/{publicId}/schedule"), serviceProviderHandler::getSchedule);
+		.andRoute(GET("/serviceproviders/{publicId}/schedule"), serviceProviderHandler::getSchedule)
+		.andRoute(GET("/serviceproviders/availability/{type}"), serviceProviderHandler::getByAvailability);
     }
 
     @Bean

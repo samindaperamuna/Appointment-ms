@@ -1,6 +1,7 @@
 package ms.asp.appointment.handler;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.data.domain.PageRequest;
@@ -9,6 +10,7 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import lombok.RequiredArgsConstructor;
+import ms.asp.appointment.domain.AvailabilityType;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.exception.ServiceProviderException;
 import ms.asp.appointment.model.Schedule;
@@ -95,22 +97,42 @@ public class ServiceProviderHandler {
 
 	if (begin.isEmpty()) {
 	    return Mono.error(new NotFoundException("Query parameter 'begin' required"));
-	} else if (CommonUtils.isValidDateTime(begin.get())) {
+	} else if (!CommonUtils.isValidDateTime(begin.get())) {
 	    return Mono.error(new NotFoundException("Query parameter 'begin' needs to be of format: "
 		    + CommonUtils.DATE_TIME_FORMAT));
 	} else if (end.isEmpty()) {
 	    return Mono.error(new NotFoundException("Query parameter 'end' required"));
-	} else if (!NumberUtils.isCreatable(end.get())) {
+	} else if (!CommonUtils.isValidDateTime(end.get())) {
 	    return Mono.error(new NotFoundException("Query parameter 'end' needs to be of format: "
 		    + CommonUtils.DATE_TIME_FORMAT));
 	}
 
-	return ServerResponse.ok().body(serviceProviderService.findSchedule(id,
-		LocalDateTime.parse(begin.get()), LocalDateTime.parse(end.get())), Schedule.class)
+	DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CommonUtils.DATE_TIME_FORMAT);
+
+	return ServerResponse.ok()
+		.body(serviceProviderService.findSchedule(id, LocalDateTime.parse(begin.get(), formatter),
+			LocalDateTime.parse(end.get(), formatter)), Schedule.class)
 		.onErrorResume(e -> {
 		    return Mono.error(
 			    new ServiceProviderException("Couldn't fetch schedule for service provider with id: " + id
 				    + ": " + e.getLocalizedMessage()));
+		});
+    }
+
+    public Mono<ServerResponse> getByAvailability(ServerRequest req) {
+	var type = req.pathVariable("type");
+
+	if (AvailabilityType.get(type).isEmpty()) {
+	    return Mono.error(new NotFoundException("Availability type not found"));
+	}
+
+	return ServerResponse.ok()
+		.body(serviceProviderService.findByAvailability(AvailabilityType.get(type).get()),
+			ServiceProviderModel.class)
+		.onErrorResume(e -> {
+		    return Mono.error(
+			    new ServiceProviderException("Couldn't fetch service providers for availability type "
+				    + type + ": " + e.getLocalizedMessage()));
 		});
     }
 }

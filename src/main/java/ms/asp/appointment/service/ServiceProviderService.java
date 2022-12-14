@@ -12,11 +12,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ms.asp.appointment.domain.AvailabilityType;
 import ms.asp.appointment.domain.ServiceProvider;
 import ms.asp.appointment.domain.Slot;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.exception.ServiceProviderException;
+import ms.asp.appointment.mapper.AppointmentMapper;
 import ms.asp.appointment.mapper.ServiceProviderMapper;
+import ms.asp.appointment.mapper.SlotMapper;
 import ms.asp.appointment.model.Schedule;
 import ms.asp.appointment.model.ServiceProviderModel;
 import ms.asp.appointment.repository.AppointmentRepository;
@@ -41,6 +44,8 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
     private final ServiceProviderSlotRepository providerSlotRepository;
     private final AvailabilityRepository availabilityRepository;
     private final ServiceProviderAvailabilityRepository providerAvailabilityRepository;
+    private final SlotMapper slotMapper;
+    private final AppointmentMapper appointmentMapper;
 
     /**
      * Pass in the repository and the mapper to the super class.
@@ -56,7 +61,9 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 	    ServiceProviderSlotRepository providerSlotRepository,
 	    AvailabilityRepository availabilityRepository,
 	    ServiceProviderAvailabilityRepository providerAvailabilityRepository,
-	    ServiceProviderMapper mapper) {
+	    ServiceProviderMapper mapper,
+	    SlotMapper slotMapper,
+	    AppointmentMapper appointmentMapper) {
 
 	super(repository, mapper);
 
@@ -66,6 +73,8 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 	this.providerSlotRepository = providerSlotRepository;
 	this.availabilityRepository = availabilityRepository;
 	this.providerAvailabilityRepository = providerAvailabilityRepository;
+	this.slotMapper = slotMapper;
+	this.appointmentMapper = appointmentMapper;
     }
 
     public Mono<Page<ServiceProviderModel>> findByPage(PageRequest pageRequest) {
@@ -167,7 +176,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 	var e = new ServiceProviderException("Service provider has linked appointments");
 
 	return findByPublicId(publicId)
-		.switchIfEmpty(Mono.error(new NotFoundException("No ServiceProvider has id = " + publicId)))
+		.switchIfEmpty(Mono.error(new NotFoundException("No service provider found for that ID")))
 		// Find appointments
 		.flatMap(p -> {
 		    return appointmentRepository.findByServiceProviderId(p.getId())
@@ -213,9 +222,33 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		}).map(mapper::toModel);
     }
 
-    public Flux<Schedule> findSchedule(String publicId, LocalDateTime begin, LocalDateTime end) {
-	// scheduleRepository.findBy(null)
-	return null;
+    public Mono<Schedule> findSchedule(String publicId, LocalDateTime begin, LocalDateTime end) {
+	return repository.findByPublicId(publicId)
+		.switchIfEmpty(Mono.error(new NotFoundException("No service provider found for that ID")))
+		.flatMap(p -> providerSlotRepository.findAMSlots(p, 10)
+			.concatWith(providerSlotRepository.findPMSlots(p, 10))
+			.map(slotMapper::toModel)
+			.collectList()
+			.zipWith(Mono.just(p)))
+		.flatMap(tuple -> appointmentRepository
+			.findByBetween(tuple.getT2().getId(), begin, end)
+			.map(appointmentMapper::toModel)
+			.collectList()
+			.map(a -> {
+			    Schedule s = new Schedule();
+			    s.setAppointments(a);
+			    s.setSlots(tuple.getT1());
+
+			    return s;
+			}));
+    }
+
+    public Flux<ServiceProviderModel> findByAvailability(AvailabilityType availabilityType) {
+	return ((ServiceProviderRepository) repository).findBy(availabilityType)
+		.flatMap(p -> {
+		    return findByPublicId(p.getPublicId());
+		})
+		.map(mapper::toModel);
     }
 
     /**
