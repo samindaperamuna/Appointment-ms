@@ -123,5 +123,10 @@
     "name": "application.endpoints.appointment-flow.delete",
     "type": "java.lang.String",
     "description": "A description for 'application.endpoints.appointment-flow.delete'"
+  },
+  {
+    "name": "application.ics-filename",
+    "type": "java.lang.String",
+    "description": "A description for 'application.ics-filename'"
   }
 ]}

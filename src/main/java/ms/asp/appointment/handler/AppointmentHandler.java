@@ -1,7 +1,11 @@
 package ms.asp.appointment.handler;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -19,6 +23,9 @@ import reactor.core.publisher.Mono;
 public class AppointmentHandler {
 
     private static final String ID_TEMPLATE = "publicId";
+
+    @Value("${appointment.ics-filename}")
+    private static String icsFileName;
 
     private final AppointmentService appointmentService;
 
@@ -100,10 +107,30 @@ public class AppointmentHandler {
 	var id = req.pathVariable(ID_TEMPLATE);
 
 	return ServerResponse.ok()
-		.body(appointmentService.history(id), AppointmentModel.class)
+		.body(appointmentService.getHistory(id), AppointmentModel.class)
 		.onErrorResume(e -> {
 		    return Mono.error(new AppointmentException("Couldn't get history for appointment with id: " + id
 			    + ": " + e.getLocalizedMessage()));
+		});
+    }
+
+    public Mono<ServerResponse> calendar(ServerRequest req) {
+	var id = req.pathVariable(ID_TEMPLATE);
+
+	return ServerResponse.ok()
+		.headers(headers -> {
+		    headers.add(HttpHeaders.CONTENT_DISPOSITION,
+			    "attachment; filename=" + icsFileName + ".ics");
+		    headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+		    headers.add("Pragma", "no-cache");
+		    headers.add("Expires", "0");
+		})
+		.contentType(MediaType.APPLICATION_OCTET_STREAM)
+		.body(appointmentService.genCalendarFile(id), Resource.class)
+		.onErrorResume(e -> {
+		    return Mono
+			    .error(new AppointmentException("Couldn't generate calendar for appointment with id: " + id
+				    + ": " + e.getLocalizedMessage()));
 		});
     }
 }

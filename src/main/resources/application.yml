@@ -25,5 +25,6 @@ logging:
     '[reactor.netty.http.client]': DEBUG
     
 application:
+  ics-filename: appointment
   reactive-logging-filter:
     enabled: false

@@ -5,6 +5,8 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.mapstruct.Mapper;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -17,6 +19,7 @@ import ms.asp.appointment.domain.AppointmentHistory;
 import ms.asp.appointment.domain.Contact;
 import ms.asp.appointment.domain.ParticipantInfo;
 import ms.asp.appointment.exception.AppointmentException;
+import ms.asp.appointment.exception.CalendarGenerationException;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.mapper.AppointmentHistoryMapper;
 import ms.asp.appointment.mapper.AppointmentMapper;
@@ -33,6 +36,13 @@ import ms.asp.appointment.repository.ParticipantInfoRepository;
 import ms.asp.appointment.repository.ParticipantRepository;
 import ms.asp.appointment.repository.PeriodRepository;
 import ms.asp.appointment.repository.ServiceProviderRepository;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.ParameterList;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.CalScale;
+import net.fortuna.ical4j.model.property.ProdId;
+import net.fortuna.ical4j.model.property.Uid;
+import net.fortuna.ical4j.model.property.Version;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -268,10 +278,43 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      * @param publicId public id of the interview.
      * @return {@link Flux<AppointmentHistory}
      */
-    public Flux<AppointmentHistory> history(String publicId) {
+    public Flux<AppointmentHistory> getHistory(String publicId) {
 
 	return historyRepository.findRevisions(publicId)
 		.switchIfEmpty(Flux.error(new NotFoundException("No history found for that ID")));
+    }
+
+    /**
+     * Generate a calendar file (ICS) for the given appointment ID if exists.
+     * 
+     * @param publicId Appointment ID (public)
+     * @return Calendar file as a {@link ByteArrayResource}
+     */
+    public Mono<Resource> genCalendarFile(String publicId) {
+	return repository.findByPublicId(publicId)
+		.switchIfEmpty(Mono.error(new NotFoundException("No appointment found for that ID")))
+		.flatMap(a -> periodRepository.findById(a.getPeriodId())
+			.zipWith(Mono.just(a)))
+		.flatMap(tup2 -> {
+		    VEvent event = new VEvent(tup2.getT1().getStart(),
+			    tup2.getT1().getEnd(),
+			    tup2.getT2().getDescription());
+
+		    Calendar calendar = new Calendar();
+		    calendar.add(new ProdId("-AppointmentMS//EN"))
+			    .add(new Version(new ParameterList(), Version.VALUE_2_0))
+			    .add(new CalScale(CalScale.VALUE_GREGORIAN))
+			    .add(new Uid(tup2.getT2().getPublicId()));
+		    calendar.add(event);
+
+		    byte[] calendarByte = calendar.toString().getBytes();
+
+		    if (calendarByte.length == 0) {
+			return Mono.error(new CalendarGenerationException("Failed to generate calendar file"));
+		    }
+
+		    return Mono.just(new ByteArrayResource(calendarByte));
+		});
     }
 
     /**

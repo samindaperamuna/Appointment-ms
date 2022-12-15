@@ -179,6 +179,24 @@ public class RouterConfig {
 				    @ApiResponse(responseCode = "400", description = "Couldn't fetch history")
 			    },
 			    parameters = { @Parameter(in = ParameterIn.PATH, name = "publicId") })),
+	    @RouterOperation(
+		    path = "/appointments/{publicId}/calendar",
+		    produces = { MediaType.APPLICATION_OCTET_STREAM_VALUE },
+		    method = RequestMethod.GET,
+		    beanClass = AppointmentHandler.class,
+		    beanMethod = "calendar",
+		    operation = @Operation(
+			    operationId = "getAppointmentCalendarFile",
+			    responses = {
+				    @ApiResponse(
+					    responseCode = "200",
+					    description = "Successful operation",
+					    content = @Content(
+						    schema = @Schema(implementation = AppointmentModel.class))),
+				    @ApiResponse(responseCode = "404", description = "Appointment not found"),
+				    @ApiResponse(responseCode = "400", description = "Couldn't create calendar file")
+			    },
+			    parameters = { @Parameter(in = ParameterIn.PATH, name = "publicId") })),
 
     })
     public RouterFunction<ServerResponse> appointmentRoutes() {
@@ -189,7 +207,8 @@ public class RouterConfig {
 		.andRoute(PUT("/appointments"), appointmentHandler::update)
 		.andRoute(DELETE("/appointments/{publicId}"), appointmentHandler::delete)
 		.andRoute(PUT("/appointments/{publicId}/reschedule"), appointmentHandler::reschedule)
-		.andRoute(GET("/appointments/{publicId}/history"), appointmentHandler::history);
+		.andRoute(GET("/appointments/{publicId}/history"), appointmentHandler::history)
+		.andRoute(GET("/appointments/{publicId}/calendar"), appointmentHandler::calendar);
     }
 
     @Bean
