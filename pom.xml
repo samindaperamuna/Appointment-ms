@@ -16,7 +16,7 @@
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
-		<fhir.version>5.5.1</fhir.version>
+		<fhir.version>6.2.0</fhir.version>
 		<mapstruct.version>1.4.2.Final</mapstruct.version>
 		<liquibase.version>4.10.0</liquibase.version>
 		<lombok.version>1.18.24</lombok.version>
@@ -66,16 +66,8 @@
 			<artifactId>ical4j</artifactId>
 			<version>4.0.0-beta4</version>
 		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>${fhir.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>org.hl7.fhir.dstu2</artifactId>
-			<version>${fhir.version}</version>
-		</dependency>
+
+		<!-- HAPI FHIR Support -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
@@ -83,7 +75,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-client</artifactId>
+			<artifactId>hapi-fhir-structures-r4</artifactId>
 			<version>${fhir.version}</version>
 		</dependency>
 

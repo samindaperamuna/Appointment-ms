@@ -1,0 +1,604 @@
+{
+	"info": {
+		"_postman_id": "eea08585-88e1-4e42-9ad3-dd0e4a0c8929",
+		"name": "appointment-ms",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1164166"
+	},
+	"item": [
+		{
+			"name": "Appointment",
+			"item": [
+				{
+					"name": "Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"jsonData = JSON.parse(responseBody);",
+									"",
+									"pm.environment.set(\"appointmentId\", jsonData.publicId);",
+									"pm.environment.set(\"periodId\", jsonData.requestedPeriod.publicId);",
+									"pm.environment.set(\"participantOneId\", jsonData.participants[0].publicId);",
+									"pm.environment.set(\"participantTwoId\", jsonData.participants[1].publicId);",
+									"pm.environment.set(\"participantInfoOneId\", jsonData.participants[0].participantInfo.publicId);",
+									"pm.environment.set(\"participantInfoTwoId\", jsonData.participants[1].participantInfo.publicId);",
+									"pm.environment.set(\"contactOneId\", jsonData.participants[1].participantInfo.contact.publicId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"ready\",\n    \"serviceProvider\": {\n        \"publicId\": \"{{serviceProviderId}}\"\n    },\n    \"serviceCategory\": \"health\",\n    \"speciality\": \"default\",\n    \"appointmentType\": \"doctor-patient\",\n    \"description\": \"Demo appointment\",\n    \"participants\": [\n        {\n            \"participantInfo\": {\n                \"name\": \"Gavin Tilderman\",\n                \"contact\": {\n                    \"telephone\": \"024556567\",\n                    \"email\": \"gavin123@tk.com\"\n                }\n            }\n        },\n        {\n            \"participantInfo\": {\n                \"name\": \"James Franco\"\n            },\n            \"type\": \"patient_support\"\n        }\n    ],\n    \"requestedPeriod\": {\n        \"start\": \"2022-12-02 10:00\",\n        \"end\": \"2022-12-02 14:00\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/appointments",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"publicId\": \"{{appointmentId}}\",\n    \"serviceProvider\": {\n        \"publicId\": \"{{serviceProviderId}}\"\n    },\n    \"status\": \"ready\",\n    \"serviceCategory\": \"health\",\n    \"speciality\": \"psych\",\n    \"appointmentType\": \"doctor-patient\",\n    \"description\": \"Demo updated appointment\",\n    \"participants\": [\n        {\n            \"publicId\": \"{{participantOneId}}\",\n            \"participantInfo\": {\n                \"publicId\": \"{{participantInfoOneId}}\",\n                \"name\": \"Gavin Tilderman\",\n                \"contact\": {\n                    \"publicId\": \"{{contactOneId}}\",\n                    \"telephone\": \"0455667788\",\n                    \"email\": \"gavin123@tk.com\"\n                }\n            }\n        },\n        {\n            \"publicId\": \"{{participantTwoId}}\",\n            \"participantInfo\": {\n                \"publicId\": \"{{participantInfoTwoId}}\",\n                \"name\": \"James Franco Jr.\",\n                \"contact\": {\n                    \"location\": null,\n                    \"telephone\": \"0342445383\",\n                    \"email\": \"jamie123@gmail.com\"\n                }\n            },\n            \"type\": \"patient_support\"\n        }\n    ],\n    \"requestedPeriod\": {\n        \"publicId\": \"{{periodId}}\",\n        \"start\": \"2022-12-02 11:00\",\n        \"end\": \"2022-12-02 13:00\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/appointments/",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointments",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/appointments/{{appointmentId}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointments",
+								"{{appointmentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/appointments/?page=0&size=100",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointments",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/appointments/{{appointmentId}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointments",
+								"{{appointmentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/appointments/{{appointmentId}}/history",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointments",
+								"{{appointmentId}}",
+								"history"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calendar",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/appointments/{{appointmentId}}/calendar",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointments",
+								"{{appointmentId}}",
+								"calendar"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ServiceProvider",
+			"item": [
+				{
+					"name": "Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"jsonData = JSON.parse(responseBody);",
+									"",
+									"pm.environment.set(\"serviceProviderId\", jsonData.publicId);",
+									"pm.environment.set(\"contactId\", jsonData.contact.publicId);",
+									"pm.environment.set(\"serviceProviderSlotOneId\", jsonData.amSlots[0].publicId);",
+									"pm.environment.set(\"serviceProviderSlotTwoId\", jsonData.pmSlots[0].publicId);",
+									"pm.environment.set(\"availabilityId\", jsonData.availability[0].publicId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"subTitle\": \"Dr Joseph's Clinic\",\n    \"location\": \"Center London\",\n    \"price\": 10.00,\n    \"start\": \"09:00\",\n    \"end\": \"17:00\",\n    \"ordersPerDaySlot\": 1,\n    \"hasDescription\": true,\n    \"active\": true,\n    \"serviceTypes\": [\n        \"med\",\n        \"psych\"\n    ],\n    \"offDays\": [\n        \"SUNDAY\",\n        \"SATURDAY\"\n    ],\n    \"contact\": {\n        \"location\": \"Greater London\",\n        \"telephone\": \"01134345456\",\n        \"email\": \"drjoseph@gmail.com\"\n    },\n    \"amSlots\": [\n        {\n            \"start\": \"09:00\",\n            \"end\": \"09:30\",\n            \"validDays\": [\n                \"MONDAY\",\n                \"WEDNESDAY\",\n                \"FRIDAY\"\n            ],\n            \"wholeWeek\": false\n        },\n        {\n            \"start\": \"09:30\",\n            \"end\": \"10:00\",\n            \"wholeWeek\": true\n        },\n        {\n            \"start\": \"10:00\",\n            \"end\": \"10:30\",\n            \"wholeWeek\": true\n        },\n        {\n            \"start\": \"10:30\",\n            \"end\": \"11:00\",\n            \"wholeWeek\": true\n        },\n        {\n            \"start\": \"11:00\",\n            \"end\": \"11:30\",\n            \"wholeWeek\": true\n        },\n        {\n            \"start\": \"11:30\",\n            \"end\": \"12:00\",\n            \"wholeWeek\": true\n        }\n    ],\n    \"pmSlots\": [\n        {\n            \"start\": \"13:00\",\n            \"end\": \"13:30\",\n            \"wholeWeek\": true\n        },\n        {\n            \"start\": \"13:30\",\n            \"end\": \"14:00\",\n            \"wholeWeek\": true\n        },\n        {\n            \"start\": \"14:00\",\n            \"end\": \"14:30\",\n            \"wholeWeek\": true\n        },\n        {\n            \"start\": \"14:30\",\n            \"end\": \"15:00\",\n            \"wholeWeek\": true\n        },\n        {\n            \"start\": \"15:00\",\n            \"end\": \"15:30\",\n            \"wholeWeek\": true\n        },\n        {\n            \"start\": \"15:30\",\n            \"end\": \"16:00\",\n            \"wholeWeek\": true\n        }\n    ],\n    \"availability\": [\n        {\n            \"availabilityType\": \"video\",\n            \"available\": true\n        },\n        {\n            \"availabilityType\": \"audio\",\n            \"available\": true\n        },\n        {\n            \"availabilityType\": \"offline\",\n            \"available\": true\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/serviceproviders",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"serviceproviders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"publicId\": \"{{serviceProviderId}}\",\n    \"subTitle\": \"Dr Joseph's Clinic\",\n    \"location\": \"Center London\",\n    \"price\": 12.00,\n    \"start\": \"09:00\",\n    \"end\": \"17:00\",\n    \"fullDayReservation\": true,\n    \"ordersPerSlot\": 1,\n    \"hasDescription\": true,\n    \"active\": true,\n    \"serviceTypes\": [\n        \"med\",\n        \"psych\"\n    ],\n    \"offDays\": [\n        \"SATURDAY\"\n    ],\n    \"contact\": {\n        \"publicId\": \"{{contactId}}\",\n        \"location\": \"Greater London\",\n        \"telephone\": \"01134345456\",\n        \"email\": \"drjoseph@gmail.com\"\n    },\n    \"availability\": [\n        {\n            \"publicId\": \"{{availabilityId}}\",\n            \"availabilityType\": \"offline\",\n            \"available\": false\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/serviceproviders",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"serviceproviders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/serviceproviders/{{serviceProviderId}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"serviceproviders",
+								"{{serviceProviderId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetSchedule",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/serviceproviders/{{serviceProviderId}}/schedule?begin=2022-12-02 00:00&end=2022-12-02 17:00",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"serviceproviders",
+								"{{serviceProviderId}}",
+								"schedule"
+							],
+							"query": [
+								{
+									"key": "begin",
+									"value": "2022-12-02 00:00"
+								},
+								{
+									"key": "end",
+									"value": "2022-12-02 17:00"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetByAvailability",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/serviceproviders/availability/{{availabilityType}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"serviceproviders",
+								"availability",
+								"{{availabilityType}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/serviceproviders?page=0&size=10",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"serviceproviders"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/serviceproviders/{{serviceProviderId}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"serviceproviders",
+								"{{serviceProviderId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "AppointmentFlow",
+			"item": [
+				{
+					"name": "Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"jsonData = JSON.parse(responseBody);",
+									"",
+									"pm.environment.set(\"flowId\", jsonData.publicId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Demo appointment flow\",\n    \"appointmentType\": \"business\",\n    \"serviceTypes\": [\n        \"civil-eng\",\n        \"mech-eng\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/appointmentflows",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointmentflows"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"publicId\": \"{{flowId}}\",\n    \"description\": \"Demo appointment flow\",\n    \"appointmentType\": \"business\",\n    \"serviceTypes\": [\n        \"civil-eng\",\n        \"mech-eng\",\n        \"soft-dev\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/appointmentflows",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointmentflows"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/appointmentflows/{{flowId}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointmentflows",
+								"{{flowId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/appointmentflows?page=0&size=100",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointmentflows"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/appointmentflows/{{flowId}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointmentflows",
+								"{{flowId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

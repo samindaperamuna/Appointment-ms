@@ -128,5 +128,10 @@
     "name": "application.ics-filename",
     "type": "java.lang.String",
     "description": "A description for 'application.ics-filename'"
+  },
+  {
+    "name": "application.fhir.server.url",
+    "type": "java.lang.String",
+    "description": "A description for 'application.fhir.server.url'"
   }
 ]}

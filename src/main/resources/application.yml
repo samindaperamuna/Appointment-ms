@@ -26,5 +26,6 @@ logging:
     
 application:
   ics-filename: appointment
+  fhir.server.url:  http://51.210.38.183:8080/fhir
   reactive-logging-filter:
     enabled: false
