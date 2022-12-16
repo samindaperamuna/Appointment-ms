@@ -133,4 +133,17 @@ public class AppointmentHandler {
 				    + ": " + e.getLocalizedMessage()));
 		});
     }
+
+    public Mono<ServerResponse> fhir(ServerRequest req) {
+	var id = req.pathVariable(ID_TEMPLATE);
+
+	return ServerResponse.ok()
+		.contentType(MediaType.APPLICATION_JSON)
+		.body(appointmentService.getFHIRAppointment(id), String.class)
+		.onErrorResume(e -> {
+		    return Mono
+			    .error(new AppointmentException("Couldn't generate FHIR data for appointment with id: " + id
+				    + ": " + e.getLocalizedMessage()));
+		});
+    }
 }

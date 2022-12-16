@@ -15,7 +15,7 @@ public class FHIRClientConfig {
     private String serverBase;
 
     public Bundle getFHIRBundle() {
-	FhirContext ctx = FhirContext.forDstu2();
+	FhirContext ctx = FhirContext.forR4();
 	IGenericClient client = ctx.newRestfulGenericClient(serverBase);
 
 	return client.search()

@@ -79,7 +79,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 
     public Mono<Page<ServiceProviderModel>> findByPage(PageRequest pageRequest) {
 	return this.repository.findBy(pageRequest)
-		.flatMap(p -> findByPublicId(p.getPublicId()))
+		.flatMap(p -> findByPublicIdEager(p.getPublicId()))
 		.map(mapper::toModel)
 		.collectList()
 		.zipWith(this.repository.count())
@@ -87,7 +87,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
     }
 
     public Mono<ServiceProviderModel> findOne(String publicId) {
-	return findByPublicId(publicId)
+	return findByPublicIdEager(publicId)
 		.map(mapper::toModel);
     }
 
@@ -96,7 +96,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 
 	return save(serviceProvider, false)
 		// Fetch all including attached entities
-		.flatMap(p -> findByPublicId(p.getPublicId()))
+		.flatMap(p -> findByPublicIdEager(p.getPublicId()))
 		.map(mapper::toModel);
     }
 
@@ -168,14 +168,14 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		// Save the service provider
 		.flatMap(p -> save(p, true))
 		// Fetch all including attached entities
-		.flatMap(p -> findByPublicId(p.getPublicId()))
+		.flatMap(p -> findByPublicIdEager(p.getPublicId()))
 		.map(mapper::toModel);
     }
 
     public Mono<ServiceProviderModel> delete(String publicId) {
 	var e = new ServiceProviderException("Service provider has linked appointments");
 
-	return findByPublicId(publicId)
+	return findByPublicIdEager(publicId)
 		.switchIfEmpty(Mono.error(new NotFoundException("No service provider found for that ID")))
 		// Find appointments
 		.flatMap(p -> {
@@ -246,7 +246,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
     public Flux<ServiceProviderModel> findByAvailability(AvailabilityType availabilityType) {
 	return ((ServiceProviderRepository) repository).findBy(availabilityType)
 		.flatMap(p -> {
-		    return findByPublicId(p.getPublicId());
+		    return findByPublicIdEager(p.getPublicId());
 		})
 		.map(mapper::toModel);
     }
@@ -363,7 +363,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
      * @param publicId String
      * @return {@link Mono<ServiceProvider>}
      */
-    private Mono<ServiceProvider> findByPublicId(String publicId) {
+    private Mono<ServiceProvider> findByPublicIdEager(String publicId) {
 	return repository.findByPublicId(publicId)
 		.switchIfEmpty(Mono.error(new NotFoundException("No service provider found for that ID")))
 		// Parse and set off days

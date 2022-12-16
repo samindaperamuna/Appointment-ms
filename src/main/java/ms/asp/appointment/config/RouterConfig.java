@@ -208,7 +208,8 @@ public class RouterConfig {
 		.andRoute(DELETE("/appointments/{publicId}"), appointmentHandler::delete)
 		.andRoute(PUT("/appointments/{publicId}/reschedule"), appointmentHandler::reschedule)
 		.andRoute(GET("/appointments/{publicId}/history"), appointmentHandler::history)
-		.andRoute(GET("/appointments/{publicId}/calendar"), appointmentHandler::calendar);
+		.andRoute(GET("/appointments/{publicId}/calendar"), appointmentHandler::calendar)
+		.andRoute(GET("/appointments/{publicId}/fhir"),  appointmentHandler::fhir);
     }
 
     @Bean
@@ -463,7 +464,7 @@ public class RouterConfig {
 			    },
 			    parameters = { @Parameter(in = ParameterIn.PATH, name = "publicId") })),
     })
-    RouterFunction<ServerResponse> appointmentFlowRoutes() {
+    public RouterFunction<ServerResponse> appointmentFlowRoutes() {
 	return RouterFunctions
 		.route(GET("/appointmentflows"), appointmentFlowHandler::all)
 		.andRoute(GET("/appointmentflows/{publicId}"), appointmentFlowHandler::byPublicId)

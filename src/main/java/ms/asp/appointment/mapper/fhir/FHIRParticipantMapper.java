@@ -8,13 +8,14 @@ import org.hl7.fhir.r4.model.Appointment.ParticipationStatus;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Period;
+import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import ms.asp.appointment.model.AppointmentServiceProviderModel;
 import ms.asp.appointment.model.ParticipantModel;
 import ms.asp.appointment.model.PeriodModel;
-import ms.asp.appointment.model.ServiceProviderModel;
 
 @Mapper
 public interface FHIRParticipantMapper {
@@ -25,9 +26,10 @@ public interface FHIRParticipantMapper {
     @Mapping(target = "period", source = "period")
     @Mapping(target = "required", source = "model.required")
     @Mapping(target = "status", source = "model.status")
-    void map(@MappingTarget AppointmentParticipantComponent component, ParticipantModel model, PeriodModel period);
+    AppointmentParticipantComponent map(ParticipantModel model, PeriodModel period);
 
-    void map(@MappingTarget AppointmentParticipantComponent participantComponent, ServiceProviderModel model);
+    @InheritConfiguration
+    AppointmentParticipantComponent map(AppointmentServiceProviderModel model, PeriodModel period);
 
     default List<CodeableConcept> map(@MappingTarget List<CodeableConcept> concepts, String value) {
 	concepts.add(new CodeableConcept(new Coding(null, value, value)));
@@ -42,7 +44,7 @@ public interface FHIRParticipantMapper {
 	    return ParticipantRequired.OPTIONAL;
 	}
     }
-    
+
     default ParticipationStatus map(String status) {
 	return ParticipationStatus.fromCode(status);
     }

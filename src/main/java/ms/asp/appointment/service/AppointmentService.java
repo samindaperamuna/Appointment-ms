@@ -13,6 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import lombok.extern.slf4j.Slf4j;
 import ms.asp.appointment.domain.Appointment;
 import ms.asp.appointment.domain.AppointmentHistory;
@@ -24,6 +26,7 @@ import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.mapper.AppointmentHistoryMapper;
 import ms.asp.appointment.mapper.AppointmentMapper;
 import ms.asp.appointment.mapper.PeriodMapper;
+import ms.asp.appointment.mapper.fhir.FHIRAppointmentMapper;
 import ms.asp.appointment.model.AppointmentModel;
 import ms.asp.appointment.model.PeriodModel;
 import ms.asp.appointment.repository.AppointmentHistoryRepository;
@@ -62,6 +65,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 
     private final PeriodMapper periodMapper;
     private final AppointmentHistoryMapper historyMapper;
+    private final FHIRAppointmentMapper fhirMapper;
 
     /**
      * Pass in the repository and the mapper to the super class.
@@ -81,7 +85,8 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	    PeriodRepository periodRepository,
 	    AppointmentMapper mapper,
 	    PeriodMapper periodMapper,
-	    AppointmentHistoryMapper historyMapper) {
+	    AppointmentHistoryMapper historyMapper,
+	    FHIRAppointmentMapper fhirMapper) {
 
 	super(repository, mapper);
 
@@ -95,11 +100,12 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	this.periodRepository = periodRepository;
 	this.periodMapper = periodMapper;
 	this.historyMapper = historyMapper;
+	this.fhirMapper = fhirMapper;
     }
 
     public Mono<Page<AppointmentModel>> findByPage(PageRequest pageRequest) {
 	return this.repository.findBy(pageRequest)
-		.flatMap(a -> findByPublicId(a.getPublicId()))
+		.flatMap(a -> findByPublicIdEager(a.getPublicId()))
 		.map(mapper::toModel)
 		.collectList()
 		.zipWith(this.repository.count())
@@ -107,7 +113,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
     }
 
     public Mono<AppointmentModel> findOne(String publicId) {
-	return findByPublicId(publicId)
+	return findByPublicIdEager(publicId)
 		.map(mapper::toModel);
     }
 
@@ -116,7 +122,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 
 	return save(appointment, false)
 		// Fetch all including attached entities
-		.flatMap(p -> findByPublicId(p.getPublicId()))
+		.flatMap(p -> findByPublicIdEager(p.getPublicId()))
 		.map(mapper::toModel);
     }
 
@@ -215,7 +221,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 			    });
 		})
 		// Save appointment history
-		.flatMap(a -> findByPublicId(a.getPublicId())
+		.flatMap(a -> findByPublicIdEager(a.getPublicId())
 			.flatMap(old -> {
 			    var history = historyMapper.toHistory(old);
 			    history.setId(null);
@@ -225,14 +231,14 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 		// Save the appointment
 		.flatMap(a -> save(a, true))
 		// Fetch all including attached entities
-		.flatMap(p -> findByPublicId(p.getPublicId()))
+		.flatMap(p -> findByPublicIdEager(p.getPublicId()))
 		.map(mapper::toModel);
     }
 
     public Mono<AppointmentModel> delete(String publicId) {
 	return repository.findByPublicId(publicId)
 		// Save appointment history
-		.flatMap(a -> findByPublicId(a.getPublicId())
+		.flatMap(a -> findByPublicIdEager(a.getPublicId())
 			.switchIfEmpty(Mono.error(new NotFoundException("No Appointement has id = " + publicId)))
 			.flatMap(old -> {
 			    var history = historyMapper.toHistory(old);
@@ -442,7 +448,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 		});
     }
 
-    public Mono<Appointment> findByPublicId(String publicId) {
+    public Mono<Appointment> findByPublicIdEager(String publicId) {
 	return repository.findByPublicId(publicId)
 		.switchIfEmpty(Mono.error(new NotFoundException("No appointment found for that ID")))
 		// Set service provider and return
@@ -516,6 +522,18 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 
 				return a;
 			    });
+		});
+    }
+
+    public Mono<String> getFHIRAppointment(String publicId) {
+	return findByPublicIdEager(publicId)
+		.switchIfEmpty(Mono.error(new NotFoundException("No appointment found for that ID")))
+		.map(mapper::toModel)
+		.map(fhirMapper::toFHIR)
+		.map(a -> {
+		    IParser parser = FhirContext.forR4().newJsonParser();
+
+		    return parser.encodeResourceToString(a);
 		});
     }
 }
