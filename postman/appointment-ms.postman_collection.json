@@ -42,7 +42,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"status\": \"ready\",\n    \"serviceProvider\": {\n        \"publicId\": \"{{serviceProviderId}}\"\n    },\n    \"serviceCategory\": \"health\",\n    \"speciality\": \"default\",\n    \"appointmentType\": \"doctor-patient\",\n    \"description\": \"Demo appointment\",\n    \"participants\": [\n        {\n            \"participantInfo\": {\n                \"name\": \"Gavin Tilderman\",\n                \"contact\": {\n                    \"telephone\": \"024556567\",\n                    \"email\": \"gavin123@tk.com\"\n                }\n            }\n        },\n        {\n            \"participantInfo\": {\n                \"name\": \"James Franco\"\n            },\n            \"type\": \"patient_support\"\n        }\n    ],\n    \"requestedPeriod\": {\n        \"start\": \"2022-12-02 10:00\",\n        \"end\": \"2022-12-02 14:00\"\n    }\n}",
+							"raw": "{\n    \"status\": \"booked\",\n    \"serviceProvider\": {\n        \"publicId\": \"{{serviceProviderId}}\"\n    },\n    \"serviceCategory\": \"health\",\n    \"speciality\": \"default\",\n    \"appointmentType\": \"doctor-patient\",\n    \"description\": \"Demo appointment\",\n    \"participants\": [\n        {\n            \"participantInfo\": {\n                \"name\": \"Gavin Tilderman\",\n                \"contact\": {\n                    \"telephone\": \"024556567\",\n                    \"email\": \"gavin123@tk.com\"\n                }\n            }\n        },\n        {\n            \"participantInfo\": {\n                \"name\": \"James Franco\"\n            },\n            \"type\": \"patient_support\"\n        }\n    ],\n    \"requestedPeriod\": {\n        \"start\": \"2022-12-02 10:00\",\n        \"end\": \"2022-12-02 14:00\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -71,7 +71,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"publicId\": \"{{appointmentId}}\",\n    \"serviceProvider\": {\n        \"publicId\": \"{{serviceProviderId}}\"\n    },\n    \"status\": \"ready\",\n    \"serviceCategory\": \"health\",\n    \"speciality\": \"psych\",\n    \"appointmentType\": \"doctor-patient\",\n    \"description\": \"Demo updated appointment\",\n    \"participants\": [\n        {\n            \"publicId\": \"{{participantOneId}}\",\n            \"participantInfo\": {\n                \"publicId\": \"{{participantInfoOneId}}\",\n                \"name\": \"Gavin Tilderman\",\n                \"contact\": {\n                    \"publicId\": \"{{contactOneId}}\",\n                    \"telephone\": \"0455667788\",\n                    \"email\": \"gavin123@tk.com\"\n                }\n            }\n        },\n        {\n            \"publicId\": \"{{participantTwoId}}\",\n            \"participantInfo\": {\n                \"publicId\": \"{{participantInfoTwoId}}\",\n                \"name\": \"James Franco Jr.\",\n                \"contact\": {\n                    \"location\": null,\n                    \"telephone\": \"0342445383\",\n                    \"email\": \"jamie123@gmail.com\"\n                }\n            },\n            \"type\": \"patient_support\"\n        }\n    ],\n    \"requestedPeriod\": {\n        \"publicId\": \"{{periodId}}\",\n        \"start\": \"2022-12-02 11:00\",\n        \"end\": \"2022-12-02 13:00\"\n    }\n}",
+							"raw": "{\n    \"publicId\": \"{{appointmentId}}\",\n    \"serviceProvider\": {\n        \"publicId\": \"{{serviceProviderId}}\"\n    },\n    \"status\": \"booked\",\n    \"serviceCategory\": \"health\",\n    \"speciality\": \"psych\",\n    \"appointmentType\": \"doctor-patient\",\n    \"description\": \"Demo updated appointment\",\n    \"participants\": [\n        {\n            \"publicId\": \"{{participantOneId}}\",\n            \"participantInfo\": {\n                \"publicId\": \"{{participantInfoOneId}}\",\n                \"name\": \"Gavin Tilderman\",\n                \"contact\": {\n                    \"publicId\": \"{{contactOneId}}\",\n                    \"telephone\": \"0455667788\",\n                    \"email\": \"gavin123@tk.com\"\n                }\n            }\n        },\n        {\n            \"publicId\": \"{{participantTwoId}}\",\n            \"participantInfo\": {\n                \"publicId\": \"{{participantInfoTwoId}}\",\n                \"name\": \"James Franco Jr.\",\n                \"contact\": {\n                    \"location\": null,\n                    \"telephone\": \"0342445383\",\n                    \"email\": \"jamie123@gmail.com\"\n                }\n            },\n            \"type\": \"patient_support\"\n        }\n    ],\n    \"requestedPeriod\": {\n        \"publicId\": \"{{periodId}}\",\n        \"start\": \"2022-12-02 11:00\",\n        \"end\": \"2022-12-02 13:00\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -190,6 +190,37 @@
 					"response": []
 				},
 				{
+					"name": "Reschedule",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start\": \"2022-12-02 11:00\",\n    \"end\": \"2022-12-02 13:00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/appointments/{{appointmentId}}/reschedule",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointments",
+								"{{appointmentId}}",
+								"reschedule"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Calendar",
 					"request": {
 						"method": "GET",
@@ -206,6 +237,28 @@
 								"appointments",
 								"{{appointmentId}}",
 								"calendar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FHIR",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/appointments/{{appointmentId}}/fhir",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"appointments",
+								"{{appointmentId}}",
+								"fhir"
 							]
 						}
 					},

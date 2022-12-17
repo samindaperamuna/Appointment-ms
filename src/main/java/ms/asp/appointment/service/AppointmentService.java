@@ -262,11 +262,17 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      * @return
      */
     public Mono<AppointmentModel> reschedule(String publicId, @Valid PeriodModel periodModel) {
-	return repository.findByPublicId(publicId)
+	return findByPublicIdEager(publicId)
 		.switchIfEmpty(Mono.error(new NotFoundException("No Appointement has id = " + publicId)))
 		// Save history
-		.flatMap(old -> historyRepository.save(historyMapper.toHistory(old))
-			.then(Mono.just(old)))
+		.flatMap(old -> {
+		    var history = historyMapper.toHistory(old);
+		    history.setId(null);
+		    history.setStatus("RESCHEDULED");
+
+		    return historyRepository.save(history)
+			    .then(Mono.just(old));
+		})
 		// Update period
 		.map(a -> {
 		    a.setPeriod(periodMapper.toEntity(periodModel));
