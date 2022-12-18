@@ -10,7 +10,7 @@ import org.mapstruct.Named;
 import ms.asp.appointment.domain.Slot;
 import ms.asp.appointment.model.SlotModel;
 
-@Mapper(config = BaseMapper.class)
+@Mapper(config = BaseMapper.class, uses = { AvailabilityMapper.class })
 public interface SlotMapper extends BaseMapper<Slot, SlotModel> {
 
     @InheritConfiguration

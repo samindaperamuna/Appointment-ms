@@ -25,5 +25,8 @@ public class Slot extends BaseEntity {
     private List<DayOfWeek> validDays;
     private String validDaysJSON;
 
+    @Transient
+    private List<Availability> availability;
+
     private boolean wholeWeek;
 }

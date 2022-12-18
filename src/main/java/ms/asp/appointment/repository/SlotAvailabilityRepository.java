@@ -4,20 +4,20 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 
 import org.springframework.r2dbc.core.DatabaseClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import io.r2dbc.spi.Row;
 import io.r2dbc.spi.RowMetadata;
 import lombok.RequiredArgsConstructor;
 import ms.asp.appointment.domain.Availability;
 import ms.asp.appointment.domain.AvailabilityType;
-import ms.asp.appointment.domain.ServiceProvider;
+import ms.asp.appointment.domain.Slot;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Component
+@Repository
 @RequiredArgsConstructor
-public class ServiceProviderAvailabilityRepository {
+public class SlotAvailabilityRepository {
 
     private final DatabaseClient databaseClient;
 
@@ -33,54 +33,54 @@ public class ServiceProviderAvailabilityRepository {
 	return availability;
     };
 
-    private final String INSERT_SQL = "INSERT INTO SERVICE_PROVIDER_AVAILABILITY"
-	    + " (SERVICE_PROVIDER_ID, AVAILABILITY_ID)"
-	    + " VALUES (:providerId, :availabilityId)";
+    private final String INSERT_SQL = "INSERT INTO SLOT_AVAILABILITY"
+	    + " (SLOT_ID, AVAILABILITY_ID)"
+	    + " VALUES (:slotId, :availabilityId)";
 
-    private final String UPDATE_SQL = "UPDATE SERVICE_PROVIDER_AVAILABILITY"
-	    + " SET SERVICE_PROVIDER_ID=:providerId, AVAILABILITY_ID=:availabilityId"
+    private final String UPDATE_SQL = "UPDATE SLOT_AVAILABILITY"
+	    + " SET SLOT_ID=:slotId, AVAILABILITY_ID=:availabilityId"
 	    + " WHERE (ID=:id)";
 
-    private final String DELETE_SQL = "DELETE FROM SERVICE_PROVIDER_AVAILABILITY"
-	    + " WHERE (SERVICE_PROVIDER_ID=:providerId AND AVAILABILITY_ID=:availabilityId)";
+    private final String DELETE_SQL = "DELETE FROM SLOT_AVAILABILITY"
+	    + " WHERE (SLOT_ID=:slotId AND AVAILABILITY_ID=:availabilityId)";
 
-    private final String SELECT_SQL = "SELECT a.* FROM SERVICE_PROVIDER_AVAILABILITY as spa"
-	    + " INNER JOIN SERVICE_PROVIDER as sp ON spa.SERVICE_PROVIDER_ID=sp.ID"
-	    + " INNER JOIN AVAILABILITY as a ON spa.AVAILABILITY_ID=a.ID"
-	    + " WHERE spa.SERVICE_PROVIDER_ID LIKE :id";
+    private final String SELECT_SQL = "SELECT a.* FROM SLOT_AVAILABILITY as sa"
+	    + " INNER JOIN SLOT as s ON sa.SLOT_ID=s.ID"
+	    + " INNER JOIN AVAILABILITY as a ON sa.AVAILABILITY_ID=a.ID"
+	    + " WHERE sa.SLOT_ID LIKE :id";
 
-    public Mono<Long> saveServiceProviderAvailability(ServiceProvider provider, Availability availability) {
+    public Mono<Long> saveSlotAvailability(Slot slot, Availability availability) {
 	return databaseClient.sql(INSERT_SQL)
-		.bind("providerId", provider.getId())
+		.bind("slotId", slot.getId())
 		.bind("availabilityId", availability.getId())
 		.fetch()
 		.first()
 		.map(r -> (Long) r.get("ID"));
     }
 
-    public Mono<Integer> updateServiceProviderAvailability(ServiceProvider provider, Availability availability,
+    public Mono<Integer> updateSlotAvailability(Slot slot, Availability availability,
 	    Long id) {
 	return databaseClient.sql(UPDATE_SQL)
-		.bind("providerId", provider.getId())
+		.bind("slotId", slot.getId())
 		.bind("availabilityId", availability.getId())
 		.bind("id", id)
 		.fetch()
 		.rowsUpdated();
     }
 
-    public Mono<Integer> deleteServiceProviderAvailability(ServiceProvider provider, Availability availability) {
+    public Mono<Integer> deleteSlotAvailability(Slot slot, Availability availability) {
 	return databaseClient.sql(DELETE_SQL)
-		.bind("providerId", provider.getId())
+		.bind("slotId", slot.getId())
 		.bind("availabilityId", availability.getId())
 		.fetch()
 		.rowsUpdated();
     }
 
-    public Flux<Availability> findAvailability(ServiceProvider provider, int fetchSize) {
+    public Flux<Availability> findAvailability(Slot slot, int fetchSize) {
 	return databaseClient.sql(SELECT_SQL)
-		.bind("id", provider.getId())
+		.bind("id", slot.getId())
 		.filter((statement, executeFunction) -> statement.fetchSize(fetchSize).execute())
-		.map(MAPPING_FUNCTION)
+		.map(MAPPING_FUNCTION)	
 		.all();
     }
 }

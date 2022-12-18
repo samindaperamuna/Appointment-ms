@@ -28,4 +28,6 @@ public class SlotModel extends BaseModel {
 
     private List<DayOfWeek> validDays;
     private boolean wholeWeek;
+    
+    private List<AvailabilityModel> availability;
 }

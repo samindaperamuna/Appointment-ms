@@ -437,7 +437,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 			    // Save participant
 			    .flatMap(p -> participantRepository.save(p))
 			    // Merge all flux operations
-			    .collect(Collectors.toSet())
+			    .collectList()
 			    .then(Mono.just(a));
 		})
 		// Save notes if exists

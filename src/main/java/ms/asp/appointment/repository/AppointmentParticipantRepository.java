@@ -3,7 +3,7 @@ package ms.asp.appointment.repository;
 import java.util.function.BiFunction;
 
 import org.springframework.r2dbc.core.DatabaseClient;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import io.r2dbc.spi.Row;
 import io.r2dbc.spi.RowMetadata;
@@ -13,7 +13,7 @@ import ms.asp.appointment.domain.Participant;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Component
+@Repository
 @RequiredArgsConstructor
 public class AppointmentParticipantRepository {
 

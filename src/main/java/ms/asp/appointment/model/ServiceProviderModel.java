@@ -38,5 +38,4 @@ public class ServiceProviderModel extends BaseModel {
     private List<SlotModel> amSlots;
     private List<SlotModel> pmSlots;
     private List<ServiceType> serviceTypes;
-    private List<AvailabilityModel> availability;
 }

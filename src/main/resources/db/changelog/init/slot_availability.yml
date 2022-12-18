@@ -4,7 +4,7 @@ databaseChangeLog:
     author: sam
     changes:
     - createTable:
-        tableName: SERVICE_PROVIDER_AVAILABILITY
+        tableName: SLOT_AVAILABILITY
         columns:
         - column:
             name: ID
@@ -14,7 +14,7 @@ databaseChangeLog:
               primaryKey: true
               nullable: false
         - column:
-            name: SERVICE_PROVIDER_ID
+            name: SLOT_ID
             type: INT
         - column:
             name: AVAILABILITY_ID

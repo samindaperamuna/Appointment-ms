@@ -43,9 +43,6 @@ public class ServiceProvider extends AuditedEntity {
 
     @Transient
     private List<Slot> pmSlots;
-
-    @Transient
-    private List<Availability> availability;
     
     @Version
     private long version;

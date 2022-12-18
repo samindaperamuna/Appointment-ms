@@ -26,7 +26,7 @@ import ms.asp.appointment.repository.AppointmentRepository;
 import ms.asp.appointment.repository.AvailabilityRepository;
 import ms.asp.appointment.repository.BaseRepository;
 import ms.asp.appointment.repository.ContactRepository;
-import ms.asp.appointment.repository.ServiceProviderAvailabilityRepository;
+import ms.asp.appointment.repository.SlotAvailabilityRepository;
 import ms.asp.appointment.repository.ServiceProviderRepository;
 import ms.asp.appointment.repository.ServiceProviderSlotRepository;
 import ms.asp.appointment.repository.SlotRepository;
@@ -43,7 +43,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
     private final SlotRepository slotRepository;
     private final ServiceProviderSlotRepository providerSlotRepository;
     private final AvailabilityRepository availabilityRepository;
-    private final ServiceProviderAvailabilityRepository providerAvailabilityRepository;
+    private final SlotAvailabilityRepository slotAvailabilityRepository;
     private final SlotMapper slotMapper;
     private final AppointmentMapper appointmentMapper;
 
@@ -60,7 +60,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 	    SlotRepository slotRepository,
 	    ServiceProviderSlotRepository providerSlotRepository,
 	    AvailabilityRepository availabilityRepository,
-	    ServiceProviderAvailabilityRepository providerAvailabilityRepository,
+	    SlotAvailabilityRepository providerAvailabilityRepository,
 	    ServiceProviderMapper mapper,
 	    SlotMapper slotMapper,
 	    AppointmentMapper appointmentMapper) {
@@ -72,7 +72,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 	this.slotRepository = slotRepository;
 	this.providerSlotRepository = providerSlotRepository;
 	this.availabilityRepository = availabilityRepository;
-	this.providerAvailabilityRepository = providerAvailabilityRepository;
+	this.slotAvailabilityRepository = providerAvailabilityRepository;
 	this.slotMapper = slotMapper;
 	this.appointmentMapper = appointmentMapper;
     }
@@ -147,24 +147,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 			    .collect(Collectors.toSet())
 			    .then(Mono.just(p));
 		})
-		// Get saved availability
-		.flatMap(p -> {
-		    if (p.getAvailability() == null || p.getAvailability().isEmpty())
-			return Mono.just(p);
 
-		    return Mono.just(p.getAvailability())
-			    .flatMapMany(Flux::fromIterable)
-			    .flatMap(a -> availabilityRepository.findByPublicId(a.getPublicId())
-				    .switchIfEmpty(
-					    Mono.error(new NotFoundException("No availability info found for that ID")))
-				    .map(availability -> {
-					a.setId(availability.getId());
-
-					return a;
-				    }))
-			    .collect(Collectors.toSet())
-			    .then(Mono.just(p));
-		})
 		// Save the service provider
 		.flatMap(p -> save(p, true))
 		// Fetch all including attached entities
@@ -199,6 +182,17 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 
 		    return Mono.just(slots)
 			    .flatMapMany(Flux::fromIterable)
+			    // Delete availability
+			    .flatMap(s -> {
+				return Mono.just(s.getAvailability())
+					.flatMapMany(Flux::fromIterable)
+					.flatMap(a -> {
+					    return slotAvailabilityRepository.deleteSlotAvailability(s, a)
+						    .then(Mono.just(a));
+					})
+					.flatMap(a -> availabilityRepository.delete(a))
+					.then(Mono.just(s));
+			    })
 			    .flatMap(s -> {
 				return providerSlotRepository.deleteServiceProviderSlot(p, s)
 					.then(Mono.just(s));
@@ -206,20 +200,12 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 			    .flatMap(s -> slotRepository.delete(s))
 			    .then(Mono.just(p));
 		})
-		// Delete availability
+
 		.flatMap(p -> {
-		    return Mono.just(p.getAvailability())
-			    .flatMapMany(Flux::fromIterable)
-			    .flatMap(a -> {
-				return providerAvailabilityRepository.deleteServiceProviderAvailability(p, a)
-					.then(Mono.just(a));
-			    })
-			    .flatMap(a -> availabilityRepository.delete(a))
-			    .then(Mono.just(p));
-		}).flatMap(p -> {
 		    return repository.delete(p)
 			    .then(Mono.just(p));
-		}).map(mapper::toModel);
+		})
+		.map(mapper::toModel);
     }
 
     public Mono<Schedule> findSchedule(String publicId, LocalDateTime begin, LocalDateTime end) {
@@ -337,22 +323,22 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 				return s;
 			    })
 			    .flatMap(slot -> slotRepository.save(slot))
-			    .flatMap(slot -> providerSlotRepository.saveServiceProviderSlot(p, slot))
-			    .then(Mono.just(p));
-		})
-		// Save availability and return
-		.flatMap(p -> {
-		    if (p.getAvailability() == null)
-			// If its update and no availability info, return
-			if (update)
-			    Mono.just(p);
-			else
-			    return Mono.error(new ServiceProviderException("Missing availability details"));
+			    .flatMap(slot -> providerSlotRepository.saveServiceProviderSlot(p, slot)
+				    .then(Mono.just(slot)))
+			    // Save availability and return
+			    .flatMap(s -> {
+				if (s.getAvailability() == null)
+				    // If no availability info, return
+				    return Mono.just(s);
 
-		    return Mono.just(p.getAvailability())
-			    .flatMapMany(Flux::fromIterable)
-			    .flatMap(a -> availabilityRepository.save(a))
-			    .flatMap(a -> providerAvailabilityRepository.saveServiceProviderAvailability(p, a))
+				return Mono.just(s.getAvailability())
+					.flatMapMany(Flux::fromIterable)
+					.flatMap(a -> availabilityRepository.save(a))
+					.flatMap(a -> slotAvailabilityRepository.saveSlotAvailability(s, a))
+					.collectList()
+					.then(Mono.just(s));
+			    })
+			    .collectList()
 			    .then(Mono.just(p));
 		});
     }
@@ -392,30 +378,33 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		// Set AM slots and return
 		.flatMap(p -> {
 		    return providerSlotRepository.findAMSlots(p, 10)
+			    .flatMap(s -> slotAvailabilityRepository.findAvailability(s, 10)
+				    .collectList()
+				    .map(a -> {
+					s.setAvailability(a);
+
+					return s;
+				    }))
 			    .collectList()
 			    .map(slots -> {
 				p.setAmSlots(slots);
 
 				return p;
 			    });
-
 		})
 		// Set PM slots and return
 		.flatMap(p -> {
 		    return providerSlotRepository.findPMSlots(p, 10)
+			    .flatMap(s -> slotAvailabilityRepository.findAvailability(s, 10)
+				    .collectList()
+				    .map(a -> {
+					s.setAvailability(a);
+
+					return s;
+				    }))
 			    .collectList()
 			    .map(s -> {
 				p.setPmSlots(s);
-
-				return p;
-			    });
-		})
-		// Set availability
-		.flatMap(p -> {
-		    return providerAvailabilityRepository.findAvailability(p, 10)
-			    .collectList()
-			    .map(a -> {
-				p.setAvailability(a);
 
 				return p;
 			    });
