@@ -3,7 +3,6 @@ package ms.asp.appointment.service;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
 import org.springframework.data.domain.Page;
@@ -15,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ms.asp.appointment.domain.AvailabilityType;
 import ms.asp.appointment.domain.ServiceProvider;
 import ms.asp.appointment.domain.Slot;
+import ms.asp.appointment.exception.AppointmentException;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.exception.ServiceProviderException;
 import ms.asp.appointment.mapper.AppointmentMapper;
@@ -26,9 +26,9 @@ import ms.asp.appointment.repository.AppointmentRepository;
 import ms.asp.appointment.repository.AvailabilityRepository;
 import ms.asp.appointment.repository.BaseRepository;
 import ms.asp.appointment.repository.ContactRepository;
-import ms.asp.appointment.repository.SlotAvailabilityRepository;
 import ms.asp.appointment.repository.ServiceProviderRepository;
 import ms.asp.appointment.repository.ServiceProviderSlotRepository;
+import ms.asp.appointment.repository.SlotAvailabilityRepository;
 import ms.asp.appointment.repository.SlotRepository;
 import ms.asp.appointment.util.JSONUtils;
 import reactor.core.publisher.Flux;
@@ -86,6 +86,14 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		.map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
+    public Flux<ServiceProviderModel> findByAvailability(AvailabilityType availabilityType) {
+	return ((ServiceProviderRepository) repository).findBy(availabilityType)
+		.flatMap(p -> {
+		    return findByPublicIdEager(p.getPublicId());
+		})
+		.map(mapper::toModel);
+    }
+
     public Mono<ServiceProviderModel> findOne(String publicId) {
 	return findByPublicIdEager(publicId)
 		.map(mapper::toModel);
@@ -127,27 +135,26 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 			    });
 		})
 		// Get saved slots
-		.flatMap(p -> {
-		    if ((p.getAmSlots() == null || p.getAmSlots().isEmpty())
-			    && (p.getPmSlots() == null || p.getPmSlots().isEmpty()))
-			return Mono.just(p);
-
-		    Set<Slot> slots = new HashSet<>(p.getAmSlots());
-		    slots.addAll(p.getPmSlots());
-
-		    return Mono.just(slots)
-			    .flatMapMany(Flux::fromIterable)
-			    .flatMap(s -> slotRepository.findByPublicId(s.getPublicId())
-				    .switchIfEmpty(Mono.error(new NotFoundException("No slot found for that ID")))
-				    .map(slot -> {
-					s.setId(slot.getId());
-
-					return s;
-				    }))
-			    .collect(Collectors.toSet())
-			    .then(Mono.just(p));
-		})
-
+//		.flatMap(p -> {
+//		    if ((p.getAmSlots() == null || p.getAmSlots().isEmpty())
+//			    && (p.getPmSlots() == null || p.getPmSlots().isEmpty()))
+//			return Mono.just(p);
+//
+//		    Set<Slot> slots = new HashSet<>(p.getAmSlots());
+//		    slots.addAll(p.getPmSlots());
+//
+//		    return Mono.just(slots)
+//			    .flatMapMany(Flux::fromIterable)
+//			    .flatMap(s -> slotRepository.findByPublicId(s.getPublicId())
+//				    .switchIfEmpty(Mono.error(new NotFoundException("No slot found for that ID")))
+//				    .map(slot -> {
+//					s.setId(slot.getId());
+//
+//					return s;
+//				    }))
+//			    .collect(Collectors.toSet())
+//			    .then(Mono.just(p));
+//		})
 		// Save the service provider
 		.flatMap(p -> save(p, true))
 		// Fetch all including attached entities
@@ -229,14 +236,6 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 			}));
     }
 
-    public Flux<ServiceProviderModel> findByAvailability(AvailabilityType availabilityType) {
-	return ((ServiceProviderRepository) repository).findBy(availabilityType)
-		.flatMap(p -> {
-		    return findByPublicIdEager(p.getPublicId());
-		})
-		.map(mapper::toModel);
-    }
-
     /**
      * This method handles both create and update calls.
      * 
@@ -311,9 +310,12 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		.flatMap(p -> repository.save(p))
 		// Save slots and return
 		.flatMap(p -> {
-		    // If its update mode and no slots, return
-		    if (update && slots.isEmpty())
+		    // If its update return; Use specific end point to update slots
+		    if (update) {
 			return Mono.just(p);
+		    } else if (slots.isEmpty()) {
+			return Mono.error(new AppointmentException("No slots are defined"));
+		    }
 
 		    return Mono.just(slots)
 			    .flatMapMany(Flux::fromIterable)

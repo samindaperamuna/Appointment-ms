@@ -171,40 +171,40 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 			    .then(Mono.just(a));
 		})
 		// Get saved participants
-		.flatMap(a -> {
-		    if (a.getParticipants() == null || a.getParticipants().isEmpty())
-			return Mono.just(a);
-
-		    return Mono.just(a.getParticipants())
-			    .flatMapMany(Flux::fromIterable)
-			    .flatMap(p -> participantRepository.findByPublicId(p.getPublicId())
-				    .onErrorComplete()
-				    .map(participant -> {
-					p.setId(participant.getId());
-
-					return p;
-				    }))
-			    .flatMap(p -> participantInfoRepository
-				    .findByPublicId(p.getParticipantInfo().getPublicId())
-				    .onErrorComplete()
-				    .map(pInfo -> {
-					p.setParticipantInfoId(pInfo.getId());
-					p.getParticipantInfo().setId(pInfo.getId());
-
-					return p;
-				    }))
-			    .flatMap(p -> contactRepository
-				    .findByPublicId(p.getParticipantInfo().getContact().getPublicId())
-				    .onErrorComplete()
-				    .map(contact -> {
-					p.getParticipantInfo().getContact().setId(contact.getId());
-					p.getParticipantInfo().setContactId(contact.getId());
-
-					return p;
-				    }))
-			    .collect(Collectors.toSet())
-			    .then(Mono.just(a));
-		})
+//		.flatMap(a -> {
+//		    if (a.getParticipants() == null || a.getParticipants().isEmpty())
+//			return Mono.just(a);
+//
+//		    return Mono.just(a.getParticipants())
+//			    .flatMapMany(Flux::fromIterable)
+//			    .flatMap(p -> participantRepository.findByPublicId(p.getPublicId())
+//				    .onErrorComplete()
+//				    .map(participant -> {
+//					p.setId(participant.getId());
+//
+//					return p;
+//				    }))
+//			    .flatMap(p -> participantInfoRepository
+//				    .findByPublicId(p.getParticipantInfo().getPublicId())
+//				    .onErrorComplete()
+//				    .map(pInfo -> {
+//					p.setParticipantInfoId(pInfo.getId());
+//					p.getParticipantInfo().setId(pInfo.getId());
+//
+//					return p;
+//				    }))
+//			    .flatMap(p -> contactRepository
+//				    .findByPublicId(p.getParticipantInfo().getContact().getPublicId())
+//				    .onErrorComplete()
+//				    .map(contact -> {
+//					p.getParticipantInfo().getContact().setId(contact.getId());
+//					p.getParticipantInfo().setContactId(contact.getId());
+//
+//					return p;
+//				    }))
+//			    .collect(Collectors.toSet())
+//			    .then(Mono.just(a));
+//		})
 		// Get saved period
 		.flatMap(a -> {
 		    if (a.getPeriod() == null || a.getPeriod().getPublicId() == null
@@ -384,13 +384,11 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 		})
 		// Save participants if exists else throw an error
 		.flatMap(a -> {
-		    if (a.getParticipants() == null) {
-			// If its update, return
-			if (update) {
-			    return Mono.just(a);
-			} else {
-			    return Mono.error(new AppointmentException("No participants are defined"));
-			}
+		    // If its update, return; Use specific end point to update participants
+		    if (update) {
+			return Mono.just(a);
+		    } else if (a.getParticipants() == null) {
+			return Mono.error(new AppointmentException("No participants are defined"));
 		    }
 
 		    return Mono.just(a.getParticipants())
