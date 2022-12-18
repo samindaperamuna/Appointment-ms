@@ -237,9 +237,9 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 
     public Mono<AppointmentModel> delete(String publicId) {
 	return repository.findByPublicId(publicId)
+		.switchIfEmpty(Mono.error(new NotFoundException("No appointement found for that ID")))
 		// Save appointment history
 		.flatMap(a -> findByPublicIdEager(a.getPublicId())
-			.switchIfEmpty(Mono.error(new NotFoundException("No Appointement has id = " + publicId)))
 			.flatMap(old -> {
 			    var history = historyMapper.toHistory(old);
 			    history.setId(null);
@@ -263,7 +263,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      */
     public Mono<AppointmentModel> reschedule(String publicId, @Valid PeriodModel periodModel) {
 	return findByPublicIdEager(publicId)
-		.switchIfEmpty(Mono.error(new NotFoundException("No Appointement has id = " + publicId)))
+		.switchIfEmpty(Mono.error(new NotFoundException("No appointement found for that ID")))
 		// Save history
 		.flatMap(old -> {
 		    var history = historyMapper.toHistory(old);

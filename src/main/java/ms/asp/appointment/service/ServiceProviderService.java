@@ -220,6 +220,13 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		.switchIfEmpty(Mono.error(new NotFoundException("No service provider found for that ID")))
 		.flatMap(p -> providerSlotRepository.findAMSlots(p, 10)
 			.concatWith(providerSlotRepository.findPMSlots(p, 10))
+			.flatMap(s -> slotAvailabilityRepository.findAvailability(s, 10)
+				.collectList()
+				.map(a -> {
+				    s.setAvailability(a);
+
+				    return s;
+				}))
 			.map(slotMapper::toModel)
 			.collectList()
 			.zipWith(Mono.just(p)))
