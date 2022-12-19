@@ -4,7 +4,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.time.DayOfWeek;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,24 +17,20 @@ import org.springframework.r2dbc.core.DatabaseClient;
 
 import ms.asp.appointment.domain.ServiceProvider;
 import ms.asp.appointment.domain.ServiceType;
-import ms.asp.appointment.domain.Slot;
+import ms.asp.appointment.util.CommonUtils;
 import ms.asp.appointment.util.JSONUtils;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @DataR2dbcTest
 public class ServiceProviderRepositoryTest {
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CommonUtils.TIME_FORMAT);
 
     @Autowired
     ServiceProviderRepository serviceProviderRepository;
 
     @Autowired
     DatabaseClient databaseClient;
-
-    @Autowired
-    SlotRepository slotRepository;
 
     @Test
     public void testRepositoryExists() {
@@ -44,8 +39,6 @@ public class ServiceProviderRepositoryTest {
 
     @Test
     public void testInsertAndQuery() {
-	ServiceProviderSlotRepository serviceProviderSlotRepository = new ServiceProviderSlotRepository(databaseClient);
-
 	ServiceProvider provider = new ServiceProvider();
 	provider.setSubTitle("Happy Life Clinics (pvt) Ltd");
 	provider.setLocation("Sri lanka");
@@ -61,21 +54,7 @@ public class ServiceProviderRepositoryTest {
 
 	provider.setServiceTypesJSON(JSONUtils.serviceTypeToJSON(serviceTypes));
 
-	Slot slot = new Slot();
-	LocalDateTime start = LocalDateTime.parse("2022-11-30 10:30", formatter);
-	LocalDateTime end = LocalDateTime.parse("2022-11-30 11:00", formatter);
-
 	this.serviceProviderRepository.save(provider)
-		.flatMap(p -> {
-		    return slotRepository.save(slot)
-			    // Save service provider / slot relationship
-			    .flatMap(s -> {
-				serviceProviderSlotRepository.saveServiceProviderSlot(p, s)
-					.subscribe();
-
-				return Mono.just(p);
-			    });
-		})
 		.flatMap(s -> serviceProviderRepository.findById(s.getId()))
 		.take(Duration.ofSeconds(1))
 		.as(StepVerifier::create)
@@ -83,11 +62,6 @@ public class ServiceProviderRepositoryTest {
 		    assertNotNull(p);
 		    assertNotNull(p.getOffDaysJSON());
 		    assertNotNull(p.getServiceTypesJSON());
-
-		    serviceProviderSlotRepository.findAMSlots(p, 10)
-			    .subscribe(s -> {
-				assertNotNull(s);
-			    });
 		})
 		.verifyComplete();
     }

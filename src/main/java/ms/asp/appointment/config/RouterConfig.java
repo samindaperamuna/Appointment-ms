@@ -26,11 +26,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import ms.asp.appointment.handler.AppointmentFlowHandler;
 import ms.asp.appointment.handler.AppointmentHandler;
+import ms.asp.appointment.handler.AvailabilityHandler;
 import ms.asp.appointment.handler.ServiceProviderHandler;
+import ms.asp.appointment.handler.SlotHandler;
 import ms.asp.appointment.model.AppointmentFlowModel;
 import ms.asp.appointment.model.AppointmentModel;
+import ms.asp.appointment.model.AvailabilityModel;
 import ms.asp.appointment.model.Schedule;
 import ms.asp.appointment.model.ServiceProviderModel;
+import ms.asp.appointment.model.SlotModel;
 
 @Configuration
 @RequiredArgsConstructor
@@ -38,6 +42,8 @@ public class RouterConfig {
 
     private final AppointmentHandler appointmentHandler;
     private final ServiceProviderHandler serviceProviderHandler;
+    private final SlotHandler slotHandler;
+    private final AvailabilityHandler availabilityHandler;
     private final AppointmentFlowHandler appointmentFlowHandler;
 
     @Bean
@@ -209,7 +215,7 @@ public class RouterConfig {
 		.andRoute(PUT("/appointments/{publicId}/reschedule"), appointmentHandler::reschedule)
 		.andRoute(GET("/appointments/{publicId}/history"), appointmentHandler::history)
 		.andRoute(GET("/appointments/{publicId}/calendar"), appointmentHandler::calendar)
-		.andRoute(GET("/appointments/{publicId}/fhir"),  appointmentHandler::fhir);
+		.andRoute(GET("/appointments/{publicId}/fhir"), appointmentHandler::fhir);
     }
 
     @Bean
@@ -364,6 +370,178 @@ public class RouterConfig {
 		.andRoute(DELETE("/serviceproviders/{publicId}"), serviceProviderHandler::delete)
 		.andRoute(GET("/serviceproviders/{publicId}/schedule"), serviceProviderHandler::getSchedule)
 		.andRoute(GET("/serviceproviders/availability/{type}"), serviceProviderHandler::getByAvailability);
+    }
+
+    @Bean
+    @RouterOperations({
+	    @RouterOperation(
+		    path = "/slots/{publicId}",
+		    produces = { MediaType.APPLICATION_JSON_VALUE },
+		    method = RequestMethod.GET,
+		    beanClass = SlotHandler.class,
+		    beanMethod = "byPublicId",
+		    operation = @Operation(
+			    operationId = "getSlotByPublicId",
+			    responses = {
+				    @ApiResponse(
+					    responseCode = "200",
+					    description = "Successful operation",
+					    content = @Content(
+						    schema = @Schema(implementation = SlotModel.class))),
+				    @ApiResponse(responseCode = "404", description = "Slot not found"),
+				    @ApiResponse(responseCode = "400", description = "Couldn't fetch slot")
+			    },
+			    parameters = { @Parameter(in = ParameterIn.PATH, name = "publicId") })),
+	    @RouterOperation(
+		    path = "/slots",
+		    produces = { MediaType.APPLICATION_JSON_VALUE },
+		    method = RequestMethod.POST,
+		    beanClass = SlotHandler.class,
+		    beanMethod = "create",
+		    operation = @Operation(
+			    operationId = "createSlot",
+			    responses = {
+				    @ApiResponse(
+					    responseCode = "200",
+					    description = "Successful operation",
+					    content = @Content(
+						    schema = @Schema(implementation = SlotModel.class))),
+				    @ApiResponse(responseCode = "400", description = "Couldn't create slot")
+			    },
+			    requestBody = @RequestBody(
+				    content = @Content(
+					    schema = @Schema(implementation = SlotModel.class))))),
+	    @RouterOperation(
+		    path = "/slots",
+		    produces = { MediaType.APPLICATION_JSON_VALUE },
+		    method = RequestMethod.PUT,
+		    beanClass = SlotHandler.class,
+		    beanMethod = "update",
+		    operation = @Operation(
+			    operationId = "updateSlot",
+			    responses = {
+				    @ApiResponse(
+					    responseCode = "200",
+					    description = "Successful operation",
+					    content = @Content(
+						    schema = @Schema(implementation = SlotModel.class))),
+				    @ApiResponse(responseCode = "404", description = "Slot not found"),
+				    @ApiResponse(responseCode = "400", description = "Couldn't update slot")
+			    },
+			    requestBody = @RequestBody(
+				    content = @Content(
+					    schema = @Schema(implementation = SlotModel.class))))),
+	    @RouterOperation(
+		    path = "/slots/{publicId}",
+		    produces = { MediaType.APPLICATION_JSON_VALUE },
+		    method = RequestMethod.DELETE,
+		    beanClass = SlotHandler.class,
+		    beanMethod = "delete",
+		    operation = @Operation(
+			    operationId = "deleteSlot",
+			    responses = {
+				    @ApiResponse(
+					    responseCode = "200",
+					    description = "Successful operation",
+					    content = @Content(
+						    schema = @Schema(implementation = SlotModel.class))),
+				    @ApiResponse(responseCode = "404", description = "Slot not found"),
+				    @ApiResponse(responseCode = "400", description = "Couldn't delete slot")
+			    },
+			    parameters = { @Parameter(in = ParameterIn.PATH, name = "publicId") })),
+    })
+    public RouterFunction<ServerResponse> slotRoutes() {
+	return RouterFunctions
+		.route(GET("/slots/{publicId}"), slotHandler::byPublicId)
+		.andRoute(POST("/slots"), slotHandler::create)
+		.andRoute(PUT("/slots"), slotHandler::update)
+		.andRoute(DELETE("/slots/{publicId}"), slotHandler::delete);
+    }
+
+    @Bean
+    @RouterOperations({
+	    @RouterOperation(
+		    path = "/availability/{publicId}",
+		    produces = { MediaType.APPLICATION_JSON_VALUE },
+		    method = RequestMethod.GET,
+		    beanClass = AvailabilityHandler.class,
+		    beanMethod = "byPublicId",
+		    operation = @Operation(
+			    operationId = "getAvailabilityByPublicId",
+			    responses = {
+				    @ApiResponse(
+					    responseCode = "200",
+					    description = "Successful operation",
+					    content = @Content(
+						    schema = @Schema(implementation = AvailabilityModel.class))),
+				    @ApiResponse(responseCode = "404", description = "Availability not found"),
+				    @ApiResponse(responseCode = "400", description = "Couldn't fetch availability")
+			    },
+			    parameters = { @Parameter(in = ParameterIn.PATH, name = "publicId") })),
+	    @RouterOperation(
+		    path = "/availability",
+		    produces = { MediaType.APPLICATION_JSON_VALUE },
+		    method = RequestMethod.POST,
+		    beanClass = AvailabilityHandler.class,
+		    beanMethod = "create",
+		    operation = @Operation(
+			    operationId = "createAvailability",
+			    responses = {
+				    @ApiResponse(
+					    responseCode = "200",
+					    description = "Successful operation",
+					    content = @Content(
+						    schema = @Schema(implementation = AvailabilityModel.class))),
+				    @ApiResponse(responseCode = "400", description = "Couldn't create slot")
+			    },
+			    requestBody = @RequestBody(
+				    content = @Content(
+					    schema = @Schema(implementation = AvailabilityModel.class))))),
+	    @RouterOperation(
+		    path = "/availability",
+		    produces = { MediaType.APPLICATION_JSON_VALUE },
+		    method = RequestMethod.PUT,
+		    beanClass = AvailabilityHandler.class,
+		    beanMethod = "update",
+		    operation = @Operation(
+			    operationId = "updateAvailability",
+			    responses = {
+				    @ApiResponse(
+					    responseCode = "200",
+					    description = "Successful operation",
+					    content = @Content(
+						    schema = @Schema(implementation = AvailabilityModel.class))),
+				    @ApiResponse(responseCode = "404", description = "Availability not found"),
+				    @ApiResponse(responseCode = "400", description = "Couldn't update availability")
+			    },
+			    requestBody = @RequestBody(
+				    content = @Content(
+					    schema = @Schema(implementation = AvailabilityModel.class))))),
+	    @RouterOperation(
+		    path = "/availability/{publicId}",
+		    produces = { MediaType.APPLICATION_JSON_VALUE },
+		    method = RequestMethod.DELETE,
+		    beanClass = AvailabilityHandler.class,
+		    beanMethod = "delete",
+		    operation = @Operation(
+			    operationId = "deleteAvailability",
+			    responses = {
+				    @ApiResponse(
+					    responseCode = "200",
+					    description = "Successful operation",
+					    content = @Content(
+						    schema = @Schema(implementation = AvailabilityModel.class))),
+				    @ApiResponse(responseCode = "404", description = "Availability not found"),
+				    @ApiResponse(responseCode = "400", description = "Couldn't delete availability")
+			    },
+			    parameters = { @Parameter(in = ParameterIn.PATH, name = "publicId") })),
+    })
+    public RouterFunction<ServerResponse> availabilityRoutes() {
+	return RouterFunctions
+		.route(GET("/availability/{publicId}"), availabilityHandler::byPublicId)
+		.andRoute(POST("/availability"), availabilityHandler::create)
+		.andRoute(PUT("/availability"), availabilityHandler::update)
+		.andRoute(DELETE("/availability/{publicId}"), availabilityHandler::delete);
     }
 
     @Bean

@@ -29,4 +29,8 @@ public class Slot extends BaseEntity {
     private List<Availability> availability;
 
     private boolean wholeWeek;
+    
+    @Transient
+    private ServiceProvider serviceProvider;
+    private Long serviceProviderId;
 }

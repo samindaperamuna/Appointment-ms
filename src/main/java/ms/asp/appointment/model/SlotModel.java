@@ -26,8 +26,10 @@ public class SlotModel extends BaseModel {
     @JsonFormat(pattern = CommonUtils.TIME_FORMAT)
     private LocalTime end;
 
+    private ServiceProviderModel serviceProvider;
+
     private List<DayOfWeek> validDays;
     private boolean wholeWeek;
-    
+
     private List<AvailabilityModel> availability;
 }

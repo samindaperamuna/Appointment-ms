@@ -34,7 +34,7 @@ public class AppointmentFlowService extends AbstractService<AppointmentFlow, Lon
     }
 
     public Mono<AppointmentFlowModel> findOne(String publicId) {
-	return findByPublicId(publicId)
+	return findByPublicIdEager(publicId)
 		.map(mapper::toModel);
     }
     
@@ -63,7 +63,7 @@ public class AppointmentFlowService extends AbstractService<AppointmentFlow, Lon
     }
 
     public Mono<AppointmentFlowModel> delete(String publicId) {
-	return findByPublicId(publicId)
+	return findByPublicIdEager(publicId)
 		.switchIfEmpty(Mono.error(new NotFoundException("No appointment flow found for that ID")))
 		.flatMap(f -> {
 		    return repository.delete(f)
@@ -91,7 +91,7 @@ public class AppointmentFlowService extends AbstractService<AppointmentFlow, Lon
 		.flatMap(repository::save);
     }
 
-    private Mono<AppointmentFlow> findByPublicId(String publicId) {
+    private Mono<AppointmentFlow> findByPublicIdEager(String publicId) {
 	return repository.findByPublicId(publicId)
 		.switchIfEmpty(Mono.error(new NotFoundException("No appointment flow found for that ID")))
 		// Parse and set service types

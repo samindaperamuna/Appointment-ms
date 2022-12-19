@@ -22,3 +22,6 @@ databaseChangeLog:
         - column:
             name: AVAILABILITY_TYPE
             type: VARCHAR(100)
+        - column:
+            name: SLOT_ID
+            type: INT

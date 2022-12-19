@@ -24,8 +24,4 @@ databaseChangeLog:
 - include:
     file: db/changelog/init/appointment_note.yml
 - include:
-    file: db/changelog/init/service_provider_slot.yml
-- include:
-    file: db/changelog/init/slot_availability.yml
-- include:
     file: db/changelog/init/appointment_flow.yml

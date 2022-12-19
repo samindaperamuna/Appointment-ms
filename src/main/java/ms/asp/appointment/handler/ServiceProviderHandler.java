@@ -60,7 +60,7 @@ public class ServiceProviderHandler {
 
     public Mono<ServerResponse> create(ServerRequest req) {
 	return req.bodyToMono(ServiceProviderModel.class)
-		.flatMap(appointment -> ServerResponse.ok().body(serviceProviderService.create(appointment),
+		.flatMap(provider -> ServerResponse.ok().body(serviceProviderService.create(provider),
 			ServiceProviderModel.class))
 		.onErrorResume(e -> {
 		    return Mono.error(new ServiceProviderException("Couldn't create new service provider: "
@@ -70,7 +70,7 @@ public class ServiceProviderHandler {
 
     public Mono<ServerResponse> update(ServerRequest req) {
 	return req.bodyToMono(ServiceProviderModel.class)
-		.flatMap(appointment -> ServerResponse.ok().body(serviceProviderService.update(appointment),
+		.flatMap(provider -> ServerResponse.ok().body(serviceProviderService.update(provider),
 			ServiceProviderModel.class))
 		.onErrorResume(e -> {
 		    return Mono.error(new ServiceProviderException("Couldn't update service provider: "

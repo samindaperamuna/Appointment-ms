@@ -35,5 +35,8 @@ databaseChangeLog:
             name: WHOLE_WEEK
             type: BOOLEAN
         - column:
+            name: SERVICE_PROVIDER_ID
+            type: INT
+        - column:
             name: COMMENT
             type: VARCHAR(500)

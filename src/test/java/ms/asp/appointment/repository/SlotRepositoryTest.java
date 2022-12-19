@@ -3,7 +3,7 @@ package ms.asp.appointment.repository;
 import static org.junit.Assert.assertNotNull;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ public class SlotRepositoryTest {
 
     @Autowired
     SlotRepository slotRepository;
-    
+
     @Test
     public void testRepositoryExists() {
 	assertNotNull(slotRepository);
@@ -28,10 +28,13 @@ public class SlotRepositoryTest {
     @Test
     public void testInsertAndQuery() {
 	Slot slot = new Slot();
-	LocalDateTime start = LocalDateTime.parse("2022-11-30 10:30", formatter);
-	LocalDateTime end = LocalDateTime.parse("2022-11-30 11:00", formatter);
-	slot.setComment("This is a detached slot");
-	
+
+	LocalTime start = LocalTime.parse("10:30", formatter);
+	LocalTime end = LocalTime.parse("11:00", formatter);
+
+	slot.setStart(start);
+	slot.setEnd(end);
+
 	this.slotRepository.save(slot)
 		.flatMap(s -> slotRepository.findById(s.getId()))
 		.take(Duration.ofSeconds(1))
