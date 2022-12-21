@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public abstract class BaseEntity implements Serializable {
 
-    @Id	
+    @Id
     private Long id;
 
     private String publicId;

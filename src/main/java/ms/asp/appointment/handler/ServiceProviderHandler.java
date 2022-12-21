@@ -39,7 +39,7 @@ public class ServiceProviderHandler {
 
 	PageRequest pageReq = PageRequest.of(Integer.parseInt(page.get()), Integer.parseInt(size.get()));
 
-	return ServerResponse.ok().body(serviceProviderService.findByPage(pageReq),
+	return ServerResponse.ok().body(serviceProviderService.findAll(pageReq),
 		ServiceProviderModel.class)
 		.onErrorResume(e -> {
 		    return Mono.error(new ServiceProviderException("Couldn't fetch service providers {pageable}: "

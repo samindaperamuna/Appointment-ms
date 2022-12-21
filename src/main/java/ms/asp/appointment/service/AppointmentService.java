@@ -7,9 +7,6 @@ import javax.validation.Valid;
 import org.mapstruct.Mapper;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,8 +15,6 @@ import ca.uhn.fhir.parser.IParser;
 import lombok.extern.slf4j.Slf4j;
 import ms.asp.appointment.domain.Appointment;
 import ms.asp.appointment.domain.AppointmentHistory;
-import ms.asp.appointment.domain.Contact;
-import ms.asp.appointment.domain.ParticipantInfo;
 import ms.asp.appointment.exception.AppointmentException;
 import ms.asp.appointment.exception.CalendarGenerationException;
 import ms.asp.appointment.exception.NotFoundException;
@@ -33,9 +28,7 @@ import ms.asp.appointment.repository.AppointmentHistoryRepository;
 import ms.asp.appointment.repository.AppointmentNoteRepository;
 import ms.asp.appointment.repository.AppointmentRepository;
 import ms.asp.appointment.repository.BaseRepository;
-import ms.asp.appointment.repository.ContactRepository;
 import ms.asp.appointment.repository.NoteRepository;
-import ms.asp.appointment.repository.ParticipantInfoRepository;
 import ms.asp.appointment.repository.ParticipantRepository;
 import ms.asp.appointment.repository.PeriodRepository;
 import ms.asp.appointment.repository.ServiceProviderRepository;
@@ -58,14 +51,16 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
     private final NoteRepository noteRepository;
     private final AppointmentNoteRepository appointmentNoteRepository;
     private final ParticipantRepository participantRepository;
-    private final ParticipantInfoRepository participantInfoRepository;
-    private final ContactRepository contactRepository;
+    private final ParticipantService participantService;
     private final ServiceProviderRepository serviceProviderRepository;
+    private final ServiceProviderService serviceProviderService;
     private final PeriodRepository periodRepository;
 
     private final PeriodMapper periodMapper;
     private final AppointmentHistoryMapper historyMapper;
     private final FHIRAppointmentMapper fhirMapper;
+
+    private static final NotFoundException NOT_FOUND = new NotFoundException("No appointment found for that ID");
 
     /**
      * Pass in the repository and the mapper to the super class.
@@ -79,9 +74,9 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	    NoteRepository noteRepository,
 	    AppointmentNoteRepository appoinmentNoteRepository,
 	    ParticipantRepository participantRepository,
-	    ParticipantInfoRepository participantInfoRepository,
-	    ContactRepository contactRepository,
+	    ParticipantService participantService,
 	    ServiceProviderRepository serviceProviderRepository,
+	    ServiceProviderService serviceProviderService,
 	    PeriodRepository periodRepository,
 	    AppointmentMapper mapper,
 	    PeriodMapper periodMapper,
@@ -94,49 +89,31 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 	this.noteRepository = noteRepository;
 	this.appointmentNoteRepository = appoinmentNoteRepository;
 	this.participantRepository = participantRepository;
-	this.participantInfoRepository = participantInfoRepository;
-	this.contactRepository = contactRepository;
+	this.participantService = participantService;
 	this.serviceProviderRepository = serviceProviderRepository;
+	this.serviceProviderService = serviceProviderService;
 	this.periodRepository = periodRepository;
 	this.periodMapper = periodMapper;
 	this.historyMapper = historyMapper;
 	this.fhirMapper = fhirMapper;
     }
 
-    public Mono<Page<AppointmentModel>> findByPage(PageRequest pageRequest) {
-	return this.repository.findBy(pageRequest)
-		.flatMap(a -> findByPublicIdEager(a.getPublicId()))
-		.map(mapper::toModel)
-		.collectList()
-		.zipWith(this.repository.count())
-		.map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
-    }
-
-    public Mono<AppointmentModel> findOne(String publicId) {
-	return findByPublicIdEager(publicId)
-		.map(mapper::toModel);
-    }
-
-    public Mono<AppointmentModel> create(AppointmentModel model) {
-	var appointment = mapper.toEntity(model);
-
+    public Mono<Appointment> create(Appointment appointment) {
 	return save(appointment, false)
 		// Fetch all including attached entities
-		.flatMap(p -> findByPublicIdEager(p.getPublicId()))
-		.map(mapper::toModel);
+		.flatMap(p -> findByPublicIdEager(p.getPublicId()));
     }
 
-    public Mono<AppointmentModel> update(AppointmentModel model) {
-
-	return Mono.just(mapper.toEntity(model))
+    public Mono<Appointment> update(Appointment appointment) {
+	return Mono.just(appointment)
 		// Get saved appointment
 		.flatMap(a -> repository.findByPublicId(a.getPublicId())
-			.switchIfEmpty(Mono.error(new NotFoundException("No appointment found for that ID")))
-			.map(appointment -> {
-			    a.setId(appointment.getId());
-			    a.setVersion(appointment.getVersion());
-			    a.setCreated(appointment.getCreated());
-			    a.setModified(appointment.getModified());
+			.switchIfEmpty(Mono.error(NOT_FOUND))
+			.map(r -> {
+			    a.setId(r.getId());
+			    a.setVersion(r.getVersion());
+			    a.setCreated(r.getCreated());
+			    a.setModified(r.getModified());
 
 			    return a;
 			}))
@@ -170,41 +147,6 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 			    .collect(Collectors.toSet())
 			    .then(Mono.just(a));
 		})
-		// Get saved participants
-//		.flatMap(a -> {
-//		    if (a.getParticipants() == null || a.getParticipants().isEmpty())
-//			return Mono.just(a);
-//
-//		    return Mono.just(a.getParticipants())
-//			    .flatMapMany(Flux::fromIterable)
-//			    .flatMap(p -> participantRepository.findByPublicId(p.getPublicId())
-//				    .onErrorComplete()
-//				    .map(participant -> {
-//					p.setId(participant.getId());
-//
-//					return p;
-//				    }))
-//			    .flatMap(p -> participantInfoRepository
-//				    .findByPublicId(p.getParticipantInfo().getPublicId())
-//				    .onErrorComplete()
-//				    .map(pInfo -> {
-//					p.setParticipantInfoId(pInfo.getId());
-//					p.getParticipantInfo().setId(pInfo.getId());
-//
-//					return p;
-//				    }))
-//			    .flatMap(p -> contactRepository
-//				    .findByPublicId(p.getParticipantInfo().getContact().getPublicId())
-//				    .onErrorComplete()
-//				    .map(contact -> {
-//					p.getParticipantInfo().getContact().setId(contact.getId());
-//					p.getParticipantInfo().setContactId(contact.getId());
-//
-//					return p;
-//				    }))
-//			    .collect(Collectors.toSet())
-//			    .then(Mono.just(a));
-//		})
 		// Get saved period
 		.flatMap(a -> {
 		    if (a.getPeriod() == null || a.getPeriod().getPublicId() == null
@@ -231,13 +173,12 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 		// Save the appointment
 		.flatMap(a -> save(a, true))
 		// Fetch all including attached entities
-		.flatMap(p -> findByPublicIdEager(p.getPublicId()))
-		.map(mapper::toModel);
+		.flatMap(p -> findByPublicIdEager(p.getPublicId()));
     }
 
-    public Mono<AppointmentModel> delete(String publicId) {
-	return repository.findByPublicId(publicId)
-		.switchIfEmpty(Mono.error(new NotFoundException("No appointement found for that ID")))
+    public Mono<Appointment> delete(Long id) {
+	return repository.findById(id)
+		.switchIfEmpty(Mono.error(NOT_FOUND))
 		// Save appointment history
 		.flatMap(a -> findByPublicIdEager(a.getPublicId())
 			.flatMap(old -> {
@@ -249,9 +190,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 			}))
 		// Delete appointment
 		.flatMap(a -> repository.deleteByPublicId(a.getPublicId())
-			.then(Mono.just(a))
-			.map(mapper::toModel));
-
+			.then(Mono.just(a)));
     }
 
     /**
@@ -263,7 +202,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      */
     public Mono<AppointmentModel> reschedule(String publicId, @Valid PeriodModel periodModel) {
 	return findByPublicIdEager(publicId)
-		.switchIfEmpty(Mono.error(new NotFoundException("No appointement found for that ID")))
+		.switchIfEmpty(Mono.error(NOT_FOUND))
 		// Save history
 		.flatMap(old -> {
 		    var history = historyMapper.toHistory(old);
@@ -304,7 +243,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      */
     public Mono<Resource> genCalendarFile(String publicId) {
 	return repository.findByPublicId(publicId)
-		.switchIfEmpty(Mono.error(new NotFoundException("No appointment found for that ID")))
+		.switchIfEmpty(Mono.error(NOT_FOUND))
 		.flatMap(a -> periodRepository.findById(a.getPeriodId())
 			.zipWith(Mono.just(a)))
 		.flatMap(tup2 -> {
@@ -336,9 +275,8 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
      * @return
      */
     private Mono<Appointment> save(Appointment appointment, boolean update) {
-
 	return Mono.just(appointment)
-		// Save service provider if exists else throw an error
+		// Set service provider ID if exists else throw an error
 		.flatMap(a -> {
 		    if (a.getServiceProvider() == null || a.getServiceProvider().getPublicId() == null) {
 			// If its update and no service provider, return
@@ -350,18 +288,16 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 		    }
 
 		    return serviceProviderRepository.findByPublicId(a.getServiceProvider().getPublicId())
+			    .switchIfEmpty(Mono.error(new NotFoundException("Service provider not found!")))
 			    .map(s -> {
 				a.setServiceProviderId(s.getId());
 
 				return a;
-			    })
-			    .switchIfEmpty(Mono.error(new NotFoundException("Service provider not found!")))
-			    .then(Mono.just(a));
+			    });
 		})
 		// Save period if exists else throw an error
 		.flatMap(a -> {
 		    if (a.getPeriod() == null) {
-			// If its update and no period, return
 			if (update) {
 			    return Mono.just(a);
 			} else {
@@ -374,7 +310,7 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 				a.setPeriodId(p.getId());
 
 				return a;
-			    }).then(Mono.just(a));
+			    });
 		})
 		.flatMap(a -> repository.save(a))
 		.onErrorComplete(e -> {
@@ -395,45 +331,12 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 			    .flatMapMany(Flux::fromIterable)
 			    .map(p -> {
 				p.setAppointmentId(a.getId());
+				p.setAppointment(a);
 
 				return p;
 			    })
-			    // Save contact and set contact id
-			    .flatMap(p -> {
-				if (p.getParticipantInfo() != null && p.getParticipantInfo().getContact() != null) {
-				    Contact contact = p.getParticipantInfo().getContact();
-
-				    if (contact.getEmail() != null || contact.getEmail() != null) {
-					return contactRepository.save(contact)
-						.map(c -> {
-						    p.getParticipantInfo().getContact().setId(c.getId());
-						    p.getParticipantInfo().setContactId(c.getId());
-
-						    return p;
-						});
-				    }
-				}
-
-				return Mono.just(p);
-			    })
-			    // Save participant info and set participant id
-			    .flatMap(p -> {
-				if (p.getParticipantInfo() != null) {
-				    ParticipantInfo pInfo = p.getParticipantInfo();
-
-				    return participantInfoRepository.save(pInfo)
-					    .map(pi -> {
-						p.getParticipantInfo().setId(pi.getId());
-						p.setParticipantInfoId(pi.getId());
-
-						return p;
-					    });
-				}
-
-				return Mono.just(p);
-			    })
-			    // Save participant
-			    .flatMap(p -> participantRepository.save(p))
+			    // Create participant
+			    .flatMap(p -> participantService.create(p))
 			    // Merge all flux operations
 			    .collectList()
 			    .then(Mono.just(a));
@@ -452,25 +355,16 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 		});
     }
 
-    public Mono<Appointment> findByPublicIdEager(String publicId) {
+    protected Mono<Appointment> findByPublicIdEager(String publicId) {
 	return repository.findByPublicId(publicId)
-		.switchIfEmpty(Mono.error(new NotFoundException("No appointment found for that ID")))
+		.switchIfEmpty(Mono.error(NOT_FOUND))
 		// Set service provider and return
-		.flatMap(a -> serviceProviderRepository.findById(a.getServiceProviderId())
+		.flatMap(a -> serviceProviderService.findByIdEager(a.getServiceProviderId())
 			.map(p -> {
 			    a.setServiceProvider(p);
-			    a.setServiceProviderId(p.getId());
 
-			    return p;
-			})
-			// Set service provider contact and return
-			.flatMap(p -> contactRepository.findById(p.getContactId())
-				.map(c -> {
-				    p.setContact(c);
-				    p.setContactId(c.getId());
-
-				    return a;
-				})))
+			    return a;
+			}))
 		// Set period information and return
 		.flatMap(a -> {
 		    if (a.getPeriodId() == null) {
@@ -495,43 +389,19 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 			    });
 		})
 		// Set participants and return
-		.flatMap(a -> {
-		    return participantRepository.findByAppointmentId(a.getId())
-			    .flatMap(p -> {
-				if (p.getParticipantInfoId() == null) {
-				    return Mono.just(p);
-				}
+		.flatMap(a -> participantRepository.findByAppointmentId(a.getId())
+			.flatMap(p -> participantService.findByIdEager(p.getId()))
+			.collectList()
+			.map(parts -> {
+			    a.setParticipants(parts);
 
-				return participantInfoRepository.findById(p.getParticipantInfoId())
-					.flatMap(pi -> {
-					    if (pi.getContactId() == null)
-						return Mono.just(pi);
-
-					    return contactRepository.findById(pi.getContactId())
-						    .map(c -> {
-							pi.setContact(c);
-
-							return pi;
-						    });
-					})
-					.map(pi -> {
-					    p.setParticipantInfo(pi);
-
-					    return p;
-					});
-			    })
-			    .collectList()
-			    .map(parts -> {
-				a.setParticipants(parts);
-
-				return a;
-			    });
-		});
+			    return a;
+			}));
     }
 
     public Mono<String> getFHIRAppointment(String publicId) {
 	return findByPublicIdEager(publicId)
-		.switchIfEmpty(Mono.error(new NotFoundException("No appointment found for that ID")))
+		.switchIfEmpty(Mono.error(NOT_FOUND))
 		.map(mapper::toModel)
 		.map(fhirMapper::toFHIR)
 		.map(a -> {

@@ -10,7 +10,6 @@ import ms.asp.appointment.domain.Availability;
 import ms.asp.appointment.domain.Slot;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.exception.SlotException;
-import ms.asp.appointment.mapper.AvailabilityMapper;
 import ms.asp.appointment.mapper.SlotMapper;
 import ms.asp.appointment.model.SlotModel;
 import ms.asp.appointment.repository.AvailabilityRepository;
@@ -27,7 +26,10 @@ public class SlotService extends AbstractService<Slot, Long, SlotModel> {
     private final AvailabilityRepository availabilityRepository;
     private final ServiceProviderRepository providerRepository;
     private final AvailabilityService availabilityService;
-    private final AvailabilityMapper availabilityMapper;
+
+    private static final NotFoundException NOT_FOUND = new NotFoundException("No slot found for that ID");
+
+    private static final SlotException NO_PROVIDER = new SlotException("No service provider defined");
 
     /**
      * Pass in the repository and the mapper to the super class.
@@ -40,20 +42,13 @@ public class SlotService extends AbstractService<Slot, Long, SlotModel> {
 	    AvailabilityRepository availabilityRepository,
 	    ServiceProviderRepository providerRepository,
 	    AvailabilityService availabilityService,
-	    SlotMapper mapper,
-	    AvailabilityMapper availabilityMapper) {
+	    SlotMapper mapper) {
 
 	super(repository, mapper);
 
 	this.availabilityRepository = availabilityRepository;
 	this.providerRepository = providerRepository;
 	this.availabilityService = availabilityService;
-	this.availabilityMapper = availabilityMapper;
-    }
-
-    public Mono<SlotModel> findOne(String publicId) {
-	return findByPublicIdEager(publicId)
-		.map(mapper::toModel);
     }
 
     public Flux<SlotModel> findAMSlots(Long serviceProviderId) {
@@ -71,44 +66,30 @@ public class SlotService extends AbstractService<Slot, Long, SlotModel> {
 		.map(mapper::toModel);
     }
 
-    public Mono<SlotModel> create(SlotModel model) {
-	return Mono.just(model)
-		.flatMap(s -> {
-		    if (s.getServiceProvider() == null) {
-			return Mono.error(new SlotException("No service provider defined"));
-		    }
-
-		    return Mono.just(s);
-		})
-		.map(mapper::toEntity)
-		.flatMap(this::create)
-		.map(mapper::toModel);
-    }
-
     protected Mono<Slot> create(Slot slot) {
 	return Mono.just(slot)
-		.flatMap(s -> save(s, false));
-    }
-
-    public Mono<SlotModel> update(SlotModel model) {
-	return Mono.just(model)
 		.flatMap(s -> {
 		    if (s.getServiceProvider() == null) {
-			return Mono.error(new SlotException("No service provider defined"));
+			return Mono.error(NO_PROVIDER);
 		    }
 
 		    return Mono.just(s);
 		})
-		.map(mapper::toEntity)
-		.flatMap(this::update)
-		.map(mapper::toModel);
+		.flatMap(s -> save(s, false));
     }
 
     protected Mono<Slot> update(Slot slot) {
 	return Mono.just(slot)
+		.flatMap(s -> {
+		    if (s.getServiceProvider() == null) {
+			return Mono.error(NO_PROVIDER);
+		    }
+
+		    return Mono.just(s);
+		})
 		// Get saved slot
 		.flatMap(s -> repository.findByPublicId(s.getPublicId())
-			.switchIfEmpty(Mono.error(new NotFoundException("No slot found for that ID")))
+			.switchIfEmpty(Mono.error(NOT_FOUND))
 			.map(r -> {
 			    s.setId(r.getId());
 
@@ -120,17 +101,16 @@ public class SlotService extends AbstractService<Slot, Long, SlotModel> {
 		.flatMap(s -> findByPublicIdEager(s.getPublicId()));
     }
 
-    public Mono<SlotModel> delete(String publicId) {
-	return findByPublicIdEager(publicId)
-		.switchIfEmpty(Mono.error(new NotFoundException("No slot found for that ID")))
+    public Mono<Slot> delete(Long id) {
+	return repository.findById(id)
+		.switchIfEmpty(Mono.error(NOT_FOUND))
 		.flatMap(s -> Mono.just(s.getAvailability())
 			.flatMapMany(Flux::fromIterable)
 			.flatMap(a -> availabilityRepository.delete(a))
 			.collectList()
 			.then(Mono.just(s)))
 		.flatMap(s -> repository.delete(s)
-			.then(Mono.just(s)))
-		.map(mapper::toModel);
+			.then(Mono.just(s)));
     }
 
     private Mono<Slot> save(Slot slot, boolean update) {
@@ -156,20 +136,6 @@ public class SlotService extends AbstractService<Slot, Long, SlotModel> {
 			return Mono.just(s);
 		    }
 
-		    if (update) {
-			return Mono.just(s.getAvailability())
-				.flatMapMany(Flux::fromIterable)
-				.map(a -> {
-				    a.setSlotId(s.getId());
-
-				    return a;
-				})
-				.map(availabilityMapper::toModel)
-				.flatMap(a -> availabilityService.update(a))
-				.collectList()
-				.then(Mono.just(s));
-		    }
-
 		    return Mono.just(s.getAvailability())
 			    .flatMapMany(Flux::fromIterable)
 			    .map(a -> {
@@ -183,9 +149,9 @@ public class SlotService extends AbstractService<Slot, Long, SlotModel> {
 		});
     }
 
-    private Mono<Slot> findByPublicIdEager(String publicId) {
+    protected Mono<Slot> findByPublicIdEager(String publicId) {
 	return repository.findByPublicId(publicId)
-		.switchIfEmpty(Mono.error(new NotFoundException("No slot found for that ID")))
+		.switchIfEmpty(Mono.error(NOT_FOUND))
 		.flatMap(s -> providerRepository.findById(s.getServiceProviderId())
 			.map(p -> {
 			    s.setServiceProvider(p);

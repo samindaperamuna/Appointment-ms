@@ -8,8 +8,8 @@ import org.springframework.data.convert.ReadingConverter;
 import ms.asp.appointment.domain.ServiceType;
 
 @ReadingConverter
-public class ServiceTypeReader implements Converter<String, ServiceType>{
-    
+public class ServiceTypeReader implements Converter<String, ServiceType> {
+
     @Override
     public ServiceType convert(String source) {
 	Optional<ServiceType> enumeration = ServiceType.get(source);

@@ -20,7 +20,7 @@ public interface BaseMapper<E extends BaseEntity, M extends BaseModel> {
     E toEntity(M m);
 
     Collection<M> toModel(Collection<E> e);
-    
+
     @Named("mapPublicId")
     default String mapPublicId(String publicId) {
 	if (publicId == null || publicId.isBlank()) {

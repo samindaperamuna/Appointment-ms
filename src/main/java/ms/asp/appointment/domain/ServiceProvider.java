@@ -43,7 +43,7 @@ public class ServiceProvider extends AuditedEntity {
 
     @Transient
     private List<Slot> pmSlots;
-    
+
     @Version
     private long version;
 }

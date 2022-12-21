@@ -36,27 +36,8 @@ public class AvailabilityService extends AbstractService<Availability, Long, Ava
 	this.slotRepository = slotRepository;
     }
 
-    public Mono<AvailabilityModel> findOne(String publicId) {
-	return findByPublicIdEager(publicId)
-		.map(mapper::toModel);
-    }
-
-    public Mono<AvailabilityModel> create(AvailabilityModel model) {
-	return Mono.just(model)
-		.map(mapper::toEntity)
-		.flatMap(this::create)
-		.map(mapper::toModel);
-    }
-
     protected Mono<Availability> create(Availability availability) {
 	return save(availability, false);
-    }
-
-    public Mono<AvailabilityModel> update(AvailabilityModel model) {
-	return Mono.just(model)
-		.map(mapper::toEntity)
-		.flatMap(this::update)
-		.map(mapper::toModel);
     }
 
     public Mono<Availability> update(Availability availability) {
@@ -75,11 +56,10 @@ public class AvailabilityService extends AbstractService<Availability, Long, Ava
 		.flatMap(p -> findByPublicIdEager(p.getPublicId()));
     }
 
-    public Mono<AvailabilityModel> delete(String publicId) {
-	return findByPublicIdEager(publicId)
+    public Mono<Availability> delete(Long id) {
+	return repository.findById(id)
 		.switchIfEmpty(Mono.error(new NotFoundException("No availability found for that ID")))
-		.flatMap(a -> repository.delete(a).then(Mono.just(a)))
-		.map(mapper::toModel);
+		.flatMap(a -> repository.delete(a).then(Mono.just(a)));
     }
 
     private Mono<Availability> save(Availability availability, boolean update) {
@@ -101,7 +81,7 @@ public class AvailabilityService extends AbstractService<Availability, Long, Ava
 		.flatMap(repository::save);
     }
 
-    private Mono<Availability> findByPublicIdEager(String publicId) {
+    protected Mono<Availability> findByPublicIdEager(String publicId) {
 	return repository.findByPublicId(publicId)
 		.switchIfEmpty(Mono.error(new NotFoundException("No availability found for that ID")))
 		.flatMap(a -> slotRepository.findById(a.getSlotId())

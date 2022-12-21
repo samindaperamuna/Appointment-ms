@@ -10,6 +10,6 @@ public class AvailabilityModel extends BaseModel {
 
     private AvailabilityType availabilityType;
     private boolean available;
-    
+
     private SlotModel slot;
 }

@@ -6,8 +6,8 @@ import org.springframework.data.convert.WritingConverter;
 import ms.asp.appointment.domain.ServiceType;
 
 @WritingConverter
-public class ServiceTypeWriter  implements Converter<ServiceType, String>  {
-    
+public class ServiceTypeWriter implements Converter<ServiceType, String> {
+
     @Override
     public String convert(ServiceType source) {
 	return source.getValue();

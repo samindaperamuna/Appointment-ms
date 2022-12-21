@@ -44,7 +44,7 @@ public interface AppointmentHistoryMapper extends BaseMapper<AppointmentHistory,
     default String toServiceProviderJSON(ServiceProvider serviceProvider) {
 	return JSONUtils.objectToJSON(serviceProvider);
     }
-    
+
     default String toParticipantJSON(List<Participant> participants) {
 	return JSONUtils.objectToJSON(participants);
     }

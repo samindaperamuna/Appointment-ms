@@ -7,7 +7,8 @@ import org.mapstruct.Mapping;
 import ms.asp.appointment.domain.Appointment;
 import ms.asp.appointment.model.AppointmentModel;
 
-@Mapper(config = BaseMapper.class,
+@Mapper(
+	config = BaseMapper.class,
 	uses = { AppointmentHistoryMapper.class,
 		ContactMapper.class,
 		ParticipantMapper.class,

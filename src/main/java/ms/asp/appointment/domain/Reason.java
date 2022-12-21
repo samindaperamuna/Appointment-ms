@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 @Table("REASON")
 @EqualsAndHashCode(callSuper = true)
 public class Reason extends BaseEntity {
-    
+
     private String system;
     private String code;
     private String display;

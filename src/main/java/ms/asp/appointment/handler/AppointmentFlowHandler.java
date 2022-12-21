@@ -33,7 +33,7 @@ public class AppointmentFlowHandler {
 
 	PageRequest pageReq = PageRequest.of(Integer.parseInt(page.get()), Integer.parseInt(size.get()));
 
-	return ServerResponse.ok().body(appointmentFlowService.findByPage(pageReq),
+	return ServerResponse.ok().body(appointmentFlowService.findAll(pageReq),
 		AppointmentFlowModel.class)
 		.onErrorResume(e -> {
 		    return Mono.error(new AppointmentFlowException("Couldn't fetch appointment flow {pageable}: "

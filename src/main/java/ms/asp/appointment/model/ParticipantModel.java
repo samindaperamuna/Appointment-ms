@@ -11,5 +11,6 @@ public class ParticipantModel extends BaseModel {
     private boolean required;
     private String status;
 
+    private AppointmentModel appointment;
     private ParticipantInfoModel participantInfo;
 }

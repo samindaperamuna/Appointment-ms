@@ -18,7 +18,7 @@ public class AppointmentIntegrationTest {
 
     @Autowired
     private WebTestClient webClient;
-    
+
     @Test
     @Order(1)
     void saveAppointmentTest() {

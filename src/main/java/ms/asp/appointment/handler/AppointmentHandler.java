@@ -42,7 +42,7 @@ public class AppointmentHandler {
 	PageRequest pageReq = PageRequest.of(Integer.parseInt(page.get()), Integer.parseInt(size.get()));
 
 	return ServerResponse.ok()
-		.body(appointmentService.findByPage(pageReq), AppointmentModel.class)
+		.body(appointmentService.findAll(pageReq), AppointmentModel.class)
 		.onErrorResume(e -> {
 		    return Mono.error(new AppointmentException("Couldn't fetch appointments {pageable}: "
 			    + e.getLocalizedMessage()));

@@ -32,8 +32,10 @@ public interface FHIRAppointmentMapper {
     @Mapping(target = "start", source = "requestedPeriod.start")
     @Mapping(target = "end", source = "requestedPeriod.end")
     @Mapping(target = "supportingInformation", ignore = true)
-    @Mapping(target = "participant", expression = "java(map(model.getParticipants(), "
-    	+ "model.getServiceProvider(), model.getRequestedPeriod()))")
+    @Mapping(
+	    target = "participant",
+	    expression = "java(map(model.getParticipants(), "
+		    + "model.getServiceProvider(), model.getRequestedPeriod()))")
     Appointment toFHIR(AppointmentModel model);
 
     default List<CodeableConcept> map(ServiceCategory serviceCategory) {

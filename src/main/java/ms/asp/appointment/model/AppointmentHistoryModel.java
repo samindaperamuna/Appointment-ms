@@ -30,12 +30,11 @@ public class AppointmentHistoryModel extends BaseModel {
     private AppointmentType appointmentType;
     private Reason reasonCode;
     private Long reasonId;
-    
 
     private String serviceProviderJSON;
     private String participantsJSON;
     private String notesJSON;
-    
+
     private long version;
     private LocalDateTime created;
     private LocalDateTime modified;

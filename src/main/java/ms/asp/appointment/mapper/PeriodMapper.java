@@ -11,8 +11,8 @@ import ms.asp.appointment.domain.Period;
 import ms.asp.appointment.model.PeriodModel;
 
 @Mapper(config = BaseMapper.class)
-public interface PeriodMapper extends BaseMapper<Period, PeriodModel>{
-    
+public interface PeriodMapper extends BaseMapper<Period, PeriodModel> {
+
     @InheritConfiguration
     @Mapping(target = "publicId", source = "publicId", qualifiedByName = "mapPublicIdPeriod")
     Period toEntity(PeriodModel model);
