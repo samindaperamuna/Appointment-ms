@@ -7,9 +7,9 @@ import ms.asp.appointment.model.ParticipantModel;
 import ms.asp.appointment.service.ParticipantService;
 
 @Component
-public class ParticipantHandler extends AbstractHandler<Participant, Long, ParticipantModel, ParticipantService> {
+public class ParticipantInfoHandler extends AbstractHandler<Participant, Long, ParticipantModel, ParticipantService> {
 
-    public ParticipantHandler(ParticipantService service) {
+    public ParticipantInfoHandler(ParticipantService service) {
 	super(service, new ParticipantModel());
     }
 }
