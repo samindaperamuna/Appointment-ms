@@ -13,15 +13,15 @@ import ms.asp.appointment.domain.ServiceProvider;
 import ms.asp.appointment.domain.Slot;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.exception.ServiceProviderException;
-import ms.asp.appointment.mapper.AppointmentMapper;
 import ms.asp.appointment.mapper.ServiceProviderMapper;
 import ms.asp.appointment.mapper.SlotMapper;
-import ms.asp.appointment.model.Schedule;
-import ms.asp.appointment.model.ServiceProviderModel;
+import ms.asp.appointment.model.serviceprovider.Schedule;
+import ms.asp.appointment.model.serviceprovider.ServiceProviderModel;
 import ms.asp.appointment.repository.AppointmentRepository;
 import ms.asp.appointment.repository.BaseRepository;
 import ms.asp.appointment.repository.ContactRepository;
 import ms.asp.appointment.repository.ServiceProviderRepository;
+import ms.asp.appointment.repository.SlotRepository;
 import ms.asp.appointment.util.JSONUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,9 +32,8 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 
     private final AppointmentRepository appointmentRepository;
     private final ContactRepository contactRepository;
-    private final SlotMapper slotMapper;
-    private final AppointmentMapper appointmentMapper;
     private final SlotService slotService;
+    private final SlotRepository slotRepository;
 
     private static final NotFoundException NOT_FOUND = new NotFoundException("No service provider found for that ID");
 
@@ -50,16 +49,15 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 	    ContactRepository contactRepository,
 	    ServiceProviderMapper mapper,
 	    SlotMapper slotMapper,
-	    AppointmentMapper appointmentMapper,
-	    SlotService slotService) {
+	    SlotService slotService,
+	    SlotRepository slotRepository) {
 
 	super(repository, mapper);
 
 	this.appointmentRepository = appointmentRepository;
 	this.contactRepository = contactRepository;
-	this.slotMapper = slotMapper;
-	this.appointmentMapper = appointmentMapper;
 	this.slotService = slotService;
+	this.slotRepository = slotRepository;
     }
 
     public Flux<ServiceProviderModel> findByAvailability(AvailabilityType availabilityType) {
@@ -129,19 +127,12 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 			.onErrorStop()
 			.then(Mono.just(p)))
 		// Delete the slots
-		.flatMap(p -> {
-		    Set<Slot> slots = new HashSet<>(p.getAmSlots());
-		    slots.addAll(p.getPmSlots());
-
-		    return Mono.just(slots)
-			    .flatMapMany(Flux::fromIterable)
-			    .flatMap(s -> slotService.delete(s.getPublicId()))
-			    .then(Mono.just(p));
-		})
-		.flatMap(p -> {
-		    return repository.delete(p)
-			    .then(Mono.just(p));
-		});
+		.flatMap(p -> slotRepository.findByServiceProviderId(id)
+			.flatMap(s -> slotService.delete(s.getPublicId()))
+			.collectList()
+			.then(Mono.just(p)))
+		.flatMap(p -> repository.delete(p)
+			.then(Mono.just(p)));
     }
 
     public Mono<Schedule> findSchedule(String publicId, LocalDateTime begin, LocalDateTime end) {
@@ -149,11 +140,12 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		.switchIfEmpty(Mono.error(NOT_FOUND))
 		.flatMap(p -> slotService.findAMSlots(p.getId())
 			.concatWith(slotService.findPMSlots(p.getId()))
+			.map(((ServiceProviderMapper) mapper)::toModel)
 			.collectList()
 			.zipWith(Mono.just(p)))
 		.flatMap(tuple -> appointmentRepository
 			.findByBetween(tuple.getT2().getId(), begin, end)
-			.map(appointmentMapper::toModel)
+			.map(((ServiceProviderMapper) mapper)::toModel)
 			.collectList()
 			.map(a -> {
 			    Schedule s = new Schedule();
@@ -251,6 +243,7 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 			    .flatMapMany(Flux::fromIterable)
 			    .map(s -> {
 				s.setServiceProviderId(p.getId());
+				s.setServiceProvider(p);
 				s.setValidDaysJSON(JSONUtils.objectToJSON(s.getValidDays()));
 
 				return s;
@@ -296,7 +289,6 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 		})
 		// Set AM slots and return
 		.flatMap(p -> slotService.findAMSlots(p.getId())
-			.map(slotMapper::toEntity)
 			.collectList()
 			.map(s -> {
 			    p.setAmSlots(s);
@@ -304,7 +296,6 @@ public class ServiceProviderService extends AbstractService<ServiceProvider, Lon
 			}))
 		// Set PM slots and return
 		.flatMap(p -> slotService.findAMSlots(p.getId())
-			.map(slotMapper::toEntity)
 			.collectList()
 			.map(s -> {
 			    p.setPmSlots(s);

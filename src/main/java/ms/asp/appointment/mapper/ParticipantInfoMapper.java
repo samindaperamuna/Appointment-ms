@@ -1,28 +1,21 @@
 package ms.asp.appointment.mapper;
 
-import static ms.asp.appointment.util.CommonUtils.generatePublicId;
-
 import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
+import ms.asp.appointment.domain.Participant;
 import ms.asp.appointment.domain.ParticipantInfo;
-import ms.asp.appointment.model.ParticipantInfoModel;
+import ms.asp.appointment.model.participantinfo.ParticipantInfoModel;
+import ms.asp.appointment.model.participantinfo.ParticipantModel;
 
 @Mapper(config = BaseMapper.class, uses = { ContactMapper.class })
 public interface ParticipantInfoMapper extends BaseMapper<ParticipantInfo, ParticipantInfoModel> {
 
     @InheritConfiguration
-    @Mapping(target = "publicId", source = "publicId", qualifiedByName = "mapPublicIdParticipantInfo")
-    ParticipantInfo toEntity(ParticipantInfoModel model);
+    ParticipantModel toModel(Participant participant);
 
-    @Named("mapPublicIdParticipantInfo")
-    default String mapPublicId(String publicId) {
-	if (publicId == null || publicId.isBlank()) {
-	    return generatePublicId();
-	}
-
-	return publicId;
-    }
+    @InheritConfiguration
+    @Mapping(target = "publicId", source = "publicId", qualifiedByName = "mapPublicId")
+    Participant toEntity(ParticipantModel model);
 }

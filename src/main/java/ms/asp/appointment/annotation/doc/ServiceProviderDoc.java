@@ -19,8 +19,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import ms.asp.appointment.handler.ServiceProviderHandler;
-import ms.asp.appointment.model.Schedule;
-import ms.asp.appointment.model.ServiceProviderModel;
+import ms.asp.appointment.model.serviceprovider.Schedule;
+import ms.asp.appointment.model.serviceprovider.ServiceProviderModel;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })

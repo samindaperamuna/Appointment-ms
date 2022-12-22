@@ -82,7 +82,7 @@ public class RouterConfig {
     public RouterFunction<ServerResponse> contactRoutes() {
 	return RouterFunctions
 		.route(GET("/contacts/{publicId}"), contactHandler::byPublicId)
-		.andRoute(POST("/contacts"), contactHandler::create)
+		.andRoute(POST("/contacts"), participantInfoHandler::create)
 		.andRoute(PUT("/contacts"), contactHandler::update)
 		.andRoute(DELETE("/contacts/{publicId}"), contactHandler::delete);
     }

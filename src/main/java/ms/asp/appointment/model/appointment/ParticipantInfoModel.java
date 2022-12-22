@@ -1,7 +1,9 @@
-package ms.asp.appointment.model;
+package ms.asp.appointment.model.appointment;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ms.asp.appointment.model.BaseModel;
+import ms.asp.appointment.model.ContactModel;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

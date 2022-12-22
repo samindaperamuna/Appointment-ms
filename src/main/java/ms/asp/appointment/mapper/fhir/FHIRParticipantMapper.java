@@ -13,9 +13,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import ms.asp.appointment.model.AppointmentServiceProviderModel;
-import ms.asp.appointment.model.ParticipantModel;
 import ms.asp.appointment.model.PeriodModel;
+import ms.asp.appointment.model.appointment.ServiceProviderModel;
+import ms.asp.appointment.model.appointment.ParticipantModel;
 
 @Mapper
 public interface FHIRParticipantMapper {
@@ -29,7 +29,7 @@ public interface FHIRParticipantMapper {
     AppointmentParticipantComponent map(ParticipantModel model, PeriodModel period);
 
     @InheritConfiguration
-    AppointmentParticipantComponent map(AppointmentServiceProviderModel model, PeriodModel period);
+    AppointmentParticipantComponent map(ServiceProviderModel model, PeriodModel period);
 
     default List<CodeableConcept> map(@MappingTarget List<CodeableConcept> concepts, String value) {
 	concepts.add(new CodeableConcept(new Coding(null, value, value)));

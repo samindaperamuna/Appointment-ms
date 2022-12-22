@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import ms.asp.appointment.domain.BaseEntity;
@@ -13,6 +14,7 @@ import ms.asp.appointment.model.BaseModel;
 import ms.asp.appointment.repository.BaseRepository;
 import reactor.core.publisher.Mono;
 
+@Transactional
 @RequiredArgsConstructor
 public abstract class AbstractService<E extends BaseEntity, ID extends Serializable, M extends BaseModel> {
 

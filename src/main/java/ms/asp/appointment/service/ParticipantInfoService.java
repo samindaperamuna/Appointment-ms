@@ -8,7 +8,7 @@ import ms.asp.appointment.domain.Contact;
 import ms.asp.appointment.domain.ParticipantInfo;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.mapper.ParticipantInfoMapper;
-import ms.asp.appointment.model.ParticipantInfoModel;
+import ms.asp.appointment.model.participantinfo.ParticipantInfoModel;
 import ms.asp.appointment.repository.BaseRepository;
 import ms.asp.appointment.repository.ContactRepository;
 import ms.asp.appointment.repository.ParticipantInfoRepository;
@@ -48,40 +48,42 @@ public class ParticipantInfoService extends AbstractService<ParticipantInfo, Lon
     public Mono<ParticipantInfo> update(ParticipantInfo participantInfo) {
 	return Mono.just(participantInfo)
 		// Get saved participant info
-		.flatMap(a -> repository.findByPublicId(a.getPublicId())
+		.flatMap(pi -> repository.findByPublicId(pi.getPublicId())
 			.switchIfEmpty(Mono.error(NOT_FOUND))
 			.map(r -> {
-			    a.setId(r.getId());
+			    pi.setId(r.getId());
 
-			    return a;
+			    return pi;
 			}))
 		// Save the participant info
-		.flatMap(a -> save(a, true))
+		.flatMap(pi -> save(pi, true))
 		// Fetch all including attached entities
-		.flatMap(p -> findByPublicIdEager(p.getPublicId()));
+		.flatMap(pi -> findByPublicIdEager(pi.getPublicId()));
     }
 
     public Mono<ParticipantInfo> delete(Long id) {
 	return repository.findById(id)
 		.switchIfEmpty(Mono.error(NOT_FOUND))
-		.map(pi -> {
-		    contactService.delete(pi.getContactId());
+		.flatMap(pi -> {
+		    if (pi.getContactId() == null) {
+			return Mono.just(pi);
+		    }
 
-		    return pi;
+		    return contactService.delete(pi.getContactId())
+			    .then(Mono.just(pi));
 		})
-		.flatMap(a -> repository.delete(a).then(Mono.just(a)));
+		.flatMap(pi -> repository.delete(pi).then(Mono.just(pi)));
     }
 
     private Mono<ParticipantInfo> save(ParticipantInfo participantInfo, boolean update) {
 	return Mono.just(participantInfo)
 		.flatMap(pi -> {
-		    if (pi.getContact() != null) {
+		    if (pi.getContact() == null) {
 			return Mono.just(pi);
 		    }
 
 		    return Mono.just(pi.getContact())
-			    .flatMap(c -> switchUpdate(c, update))
-			    .then(Mono.just(pi));
+			    .flatMap(c -> switchUpdate(pi, c, update));
 		})
 		.flatMap(repository::save);
     }
@@ -89,19 +91,35 @@ public class ParticipantInfoService extends AbstractService<ParticipantInfo, Lon
     protected Mono<ParticipantInfo> findByPublicIdEager(String publicId) {
 	return repository.findByPublicId(publicId)
 		.switchIfEmpty(Mono.error(NOT_FOUND))
-		.flatMap(pi -> contactRepository.findById(pi.getContactId())
-			.map(c -> {
-			    pi.setContact(c);
+		.flatMap(pi -> {
+		    if (pi.getContactId() == null) {
+			return Mono.just(pi);
+		    }
 
-			    return pi;
-			}));
+		    return contactRepository.findById(pi.getContactId())
+			    .map(c -> {
+				pi.setContact(c);
+
+				return pi;
+			    });
+		});
     }
 
-    private Mono<Contact> switchUpdate(Contact contact, boolean update) {
+    private Mono<ParticipantInfo> switchUpdate(ParticipantInfo pi, Contact contact, boolean update) {
 	if (update) {
-	    return contactService.update(contact);
+	    return contactService.update(contact)
+		    .map(c -> {
+			pi.setContactId(c.getId());
+
+			return pi;
+		    });
 	} else {
-	    return contactService.create(contact);
+	    return contactService.create(contact)
+		    .map(c -> {
+			pi.setContactId(c.getId());
+
+			return pi;
+		    });
 	}
     }
 }

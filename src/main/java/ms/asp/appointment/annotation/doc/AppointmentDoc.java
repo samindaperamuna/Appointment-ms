@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import ms.asp.appointment.handler.AppointmentHandler;
-import ms.asp.appointment.model.AppointmentModel;
+import ms.asp.appointment.model.appointment.AppointmentModel;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })

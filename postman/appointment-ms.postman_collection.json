@@ -267,6 +267,148 @@
 			]
 		},
 		{
+			"name": "Participant",
+			"item": [
+				{
+					"name": "Create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"jsonData = JSON.parse(responseBody);",
+									"",
+									"pm.environment.set(\"participantId\", jsonData.publicId);",
+									"pm.environment.set(\"participantInfoId\", jsonData.participantInfo.publicId);",
+									"pm.environment.set(\"participantContactId\", jsonData.participantInfo.contact.publicId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"appointment\": {\n        \"publicId\": \"{{appointmentId}}\"\n    },\n    \"participantInfo\": {\n        \"name\": \"James Cameron\",\n        \"contact\": {\n            \"telephone\": \"04423568234\",\n            \"email\": \"jamescameron@universal.com\"\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/participants",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"participants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"appointment\": {\n        \"publicId\": \"{{appointmentId}}\"\n    },\n    \"publicId\": \"{{participantId}}\",\n    \"participantInfo\": {\n        \"publicId\": \"{{participantInfoId}}\",\n        \"name\": \"James Cameron Jr.\",\n        \"contact\": {\n            \"publicId\": \"{{participantContactId}}\",\n            \"telephone\": \"04423455677\",\n            \"email\": \"jamescameron@gmail.com\"\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/participants",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"participants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/participants/{{participantId}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"participants",
+								"{{participantId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FindOne",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/participants/{{participantId}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"participants",
+								"{{participantId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "ServiceProvider",
 			"item": [
 				{
@@ -332,7 +474,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"publicId\": \"{{serviceProviderId}}\",\n    \"subTitle\": \"Dr Joseph's Clinic\",\n    \"location\": \"Center London\",\n    \"price\": 12.00,\n    \"start\": \"09:00\",\n    \"end\": \"17:00\",\n    \"fullDayReservation\": true,\n    \"ordersPerSlot\": 1,\n    \"hasDescription\": true,\n    \"active\": true,\n    \"serviceTypes\": [\n        \"med\",\n        \"psych\"\n    ],\n    \"offDays\": [\n        \"SATURDAY\"\n    ],\n    \"contact\": {\n        \"publicId\": \"{{contactId}}\",\n        \"location\": \"Greater London\",\n        \"telephone\": \"01134345456\",\n        \"email\": \"drjoseph@gmail.com\"\n    }\n}",
+							"raw": "{\n    \"publicId\": \"{{serviceProviderId}}\",\n    \"subTitle\": \"Dr Joseph's Clinic\",\n    \"location\": \"Center London\",\n    \"price\": 12.00,\n    \"start\": \"09:00\",\n    \"end\": \"17:00\",\n    \"fullDayReservation\": true,\n    \"ordersPerSlot\": 1,\n    \"hasDescription\": true,\n    \"active\": true,\n    \"serviceTypes\": [\n        \"med\",\n        \"psych\"\n    ],\n    \"offDays\": [\n        \"SATURDAY\"\n    ],\n    \"contact\": {\n        \"publicId\": \"{{contactId}}\",\n        \"location\": \"Greater London\",\n        \"telephone\": \"02423756712\",\n        \"email\": \"josephsclinic@gmail.com\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"

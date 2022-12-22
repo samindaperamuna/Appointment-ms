@@ -8,9 +8,10 @@ import ms.asp.appointment.domain.ParticipantInfo;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.exception.ParticipantException;
 import ms.asp.appointment.mapper.ParticipantMapper;
-import ms.asp.appointment.model.ParticipantModel;
+import ms.asp.appointment.model.participant.ParticipantModel;
 import ms.asp.appointment.repository.AppointmentRepository;
 import ms.asp.appointment.repository.ParticipantRepository;
+import ms.asp.appointment.repository.PeriodRepository;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 public class ParticipantService extends AbstractService<Participant, Long, ParticipantModel> {
 
     private final AppointmentRepository appointmentRepository;
+    private final PeriodRepository periodRepository;
     private final ParticipantInfoService participantInfoService;
 
     private static final NotFoundException NOT_FOUND = new NotFoundException("No participant found for that ID");
@@ -26,12 +28,14 @@ public class ParticipantService extends AbstractService<Participant, Long, Parti
     public ParticipantService(
 	    ParticipantRepository repository,
 	    AppointmentRepository appointmentRepository,
+	    PeriodRepository periodRepository,
 	    ParticipantInfoService participantInfoService,
 	    ParticipantMapper mapper) {
 
 	super(repository, mapper);
 
 	this.appointmentRepository = appointmentRepository;
+	this.periodRepository = periodRepository;
 	this.participantInfoService = participantInfoService;
     }
 
@@ -56,24 +60,24 @@ public class ParticipantService extends AbstractService<Participant, Long, Parti
 
 		    return Mono.just(p);
 		})
-		// Get saved slot
-		.flatMap(s -> repository.findByPublicId(s.getPublicId())
+		// Get saved participant
+		.flatMap(p -> repository.findByPublicId(p.getPublicId())
 			.switchIfEmpty(Mono.error(NOT_FOUND))
 			.map(r -> {
-			    s.setId(r.getId());
+			    p.setId(r.getId());
 
-			    return s;
+			    return p;
 			}))
-		// Save the slot
-		.flatMap(s -> save(s, true))
+		// Save the participant
+		.flatMap(p -> save(p, true))
 		// Fetch all including attached entities
-		.flatMap(s -> findByPublicIdEager(s.getPublicId()));
+		.flatMap(p -> findByPublicIdEager(p.getPublicId()));
     }
 
     public Mono<Participant> delete(Long id) {
 	return repository.findById(id)
 		.switchIfEmpty(Mono.error(NOT_FOUND))
-		.flatMap(p -> Mono.just(p.getParticipantInfo())
+		.flatMap(p -> participantInfoService.findByIdEager(p.getParticipantInfoId())
 			.flatMap(pi -> participantInfoService.delete(pi.getPublicId()))
 			.then(Mono.just(p)))
 		.flatMap(p -> repository.delete(p)
@@ -96,7 +100,6 @@ public class ParticipantService extends AbstractService<Participant, Long, Parti
 				return p;
 			    });
 		})
-		.flatMap(repository::save)
 		// Save participant info
 		.flatMap(p -> {
 		    if (p.getParticipantInfo() == null) {
@@ -104,9 +107,10 @@ public class ParticipantService extends AbstractService<Participant, Long, Parti
 		    }
 
 		    return Mono.just(p.getParticipantInfo())
-			    .flatMap(pi -> switchUpdate(pi, update))
+			    .flatMap(pi -> switchUpdate(p, pi, update))
 			    .then(Mono.just(p));
-		});
+		})
+		.flatMap(repository::save);
     }
 
     protected Mono<Participant> findByPublicIdEager(String publicId) {
@@ -114,6 +118,12 @@ public class ParticipantService extends AbstractService<Participant, Long, Parti
 		.switchIfEmpty(Mono.error(NOT_FOUND))
 		// Get appointment
 		.flatMap(p -> appointmentRepository.findById(p.getAppointmentId())
+			.flatMap(a -> periodRepository.findById(a.getPeriodId())
+				.map(r -> {
+				    a.setPeriod(r);
+
+				    return a;
+				}))
 			.map(a -> {
 			    p.setAppointment(a);
 
@@ -128,11 +138,21 @@ public class ParticipantService extends AbstractService<Participant, Long, Parti
 			}));
     }
 
-    private Mono<ParticipantInfo> switchUpdate(ParticipantInfo participantInfo, boolean update) {
+    private Mono<Participant> switchUpdate(Participant participant, ParticipantInfo participantInfo, boolean update) {
 	if (update) {
-	    return participantInfoService.update(participantInfo);
+	    return participantInfoService.update(participantInfo)
+		    .map(pi -> {
+			participant.setParticipantInfoId(pi.getId());
+
+			return participant;
+		    });
 	} else {
-	    return participantInfoService.create(participantInfo);
+	    return participantInfoService.create(participantInfo)
+		    .map(pi -> {
+			participant.setParticipantInfoId(pi.getId());
+
+			return participant;
+		    });
 	}
     }
 }

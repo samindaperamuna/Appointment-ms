@@ -22,8 +22,8 @@ import ms.asp.appointment.mapper.AppointmentHistoryMapper;
 import ms.asp.appointment.mapper.AppointmentMapper;
 import ms.asp.appointment.mapper.PeriodMapper;
 import ms.asp.appointment.mapper.fhir.FHIRAppointmentMapper;
-import ms.asp.appointment.model.AppointmentModel;
 import ms.asp.appointment.model.PeriodModel;
+import ms.asp.appointment.model.appointment.AppointmentModel;
 import ms.asp.appointment.repository.AppointmentHistoryRepository;
 import ms.asp.appointment.repository.AppointmentNoteRepository;
 import ms.asp.appointment.repository.AppointmentRepository;
@@ -188,6 +188,11 @@ public class AppointmentService extends AbstractService<Appointment, Long, Appoi
 
 			    return historyRepository.save(history).then(Mono.just(a));
 			}))
+		// Delete participants
+		.flatMap(a -> participantRepository.findByAppointmentId(a.getId())
+			.flatMap(p -> participantService.delete(p.getId()))
+			.collectList()
+			.then(Mono.just(a)))
 		// Delete appointment
 		.flatMap(a -> repository.deleteByPublicId(a.getPublicId())
 			.then(Mono.just(a)));

@@ -1,28 +1,31 @@
 package ms.asp.appointment.mapper;
 
-import static ms.asp.appointment.util.CommonUtils.generatePublicId;
-
 import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
+import ms.asp.appointment.domain.Appointment;
 import ms.asp.appointment.domain.Participant;
-import ms.asp.appointment.model.ParticipantModel;
+import ms.asp.appointment.domain.ParticipantInfo;
+import ms.asp.appointment.model.participant.AppointmentModel;
+import ms.asp.appointment.model.participant.ParticipantInfoModel;
+import ms.asp.appointment.model.participant.ParticipantModel;
 
-@Mapper(config = BaseMapper.class, uses = { ParticipantInfoMapper.class })
+@Mapper(config = BaseMapper.class, uses = { ContactMapper.class, PeriodMapper.class })
 public interface ParticipantMapper extends BaseMapper<Participant, ParticipantModel> {
 
     @InheritConfiguration
-    @Mapping(target = "publicId", source = "publicId", qualifiedByName = "mapPublicIdParticipant")
-    Participant toEntity(ParticipantModel model);
+    ParticipantInfo toEntity(ParticipantInfoModel model);
 
-    @Named("mapPublicIdParticipant")
-    default String mapPublicId(String publicId) {
-	if (publicId == null || publicId.isBlank()) {
-	    return generatePublicId();
-	}
+    @InheritConfiguration
+    @Mapping(target = "publicId", qualifiedByName = "mapPublicId")
+    ParticipantInfoModel toModel(ParticipantInfo participantInfo);
 
-	return publicId;
-    }
+    @InheritConfiguration
+    @Mapping(source = "requestedPeriod", target = "period")
+    Appointment toEntity(AppointmentModel model);
+
+    @InheritConfiguration
+    @Mapping(source = "period", target = "requestedPeriod")
+    AppointmentModel toModel(Appointment appointment);
 }

@@ -1,4 +1,4 @@
-package ms.asp.appointment.model;
+package ms.asp.appointment.model.serviceprovider;
 
 import java.util.List;
 

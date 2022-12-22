@@ -11,4 +11,6 @@ public interface SlotRepository extends BaseRepository<Slot, Long> {
 
     @Query("SELECT * FROM SLOT WHERE START BETWEEN :startTime AND :endTime AND SERVICE_PROVIDER_ID=:serviceProviderId")
     Flux<Slot> findByProviderAndStartBetween(Long serviceProviderId, LocalTime startTime, LocalTime endTime);
+    
+    Flux<Slot> findByServiceProviderId(Long serviceProviderId);
 }

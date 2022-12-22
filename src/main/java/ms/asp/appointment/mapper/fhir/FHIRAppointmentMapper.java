@@ -19,10 +19,10 @@ import ms.asp.appointment.domain.Reason;
 import ms.asp.appointment.domain.ServiceCategory;
 import ms.asp.appointment.domain.ServiceType;
 import ms.asp.appointment.domain.Speciality;
-import ms.asp.appointment.model.AppointmentModel;
-import ms.asp.appointment.model.AppointmentServiceProviderModel;
-import ms.asp.appointment.model.ParticipantModel;
 import ms.asp.appointment.model.PeriodModel;
+import ms.asp.appointment.model.appointment.AppointmentModel;
+import ms.asp.appointment.model.appointment.ServiceProviderModel;
+import ms.asp.appointment.model.appointment.ParticipantModel;
 
 @Mapper(uses = { FHIRParticipantMapper.class })
 public interface FHIRAppointmentMapper {
@@ -77,7 +77,7 @@ public interface FHIRAppointmentMapper {
     }
 
     default List<AppointmentParticipantComponent> map(List<ParticipantModel> participants,
-	    AppointmentServiceProviderModel serviceProvider, PeriodModel period) {
+	    ServiceProviderModel serviceProvider, PeriodModel period) {
 
 	List<AppointmentParticipantComponent> participantComponentList = new ArrayList<>();
 

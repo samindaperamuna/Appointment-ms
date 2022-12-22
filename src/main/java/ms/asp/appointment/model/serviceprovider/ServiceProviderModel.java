@@ -1,4 +1,4 @@
-package ms.asp.appointment.model;
+package ms.asp.appointment.model.serviceprovider;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ms.asp.appointment.domain.ServiceType;
+import ms.asp.appointment.model.BaseModel;
+import ms.asp.appointment.model.ContactModel;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

@@ -8,7 +8,7 @@ import ms.asp.appointment.domain.Availability;
 import ms.asp.appointment.exception.AvailabilityException;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.mapper.AvailabilityMapper;
-import ms.asp.appointment.model.AvailabilityModel;
+import ms.asp.appointment.model.availability.AvailabilityModel;
 import ms.asp.appointment.repository.AvailabilityRepository;
 import ms.asp.appointment.repository.BaseRepository;
 import ms.asp.appointment.repository.SlotRepository;

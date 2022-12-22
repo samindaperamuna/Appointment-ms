@@ -11,7 +11,7 @@ import ms.asp.appointment.domain.Slot;
 import ms.asp.appointment.exception.NotFoundException;
 import ms.asp.appointment.exception.SlotException;
 import ms.asp.appointment.mapper.SlotMapper;
-import ms.asp.appointment.model.SlotModel;
+import ms.asp.appointment.model.slot.SlotModel;
 import ms.asp.appointment.repository.AvailabilityRepository;
 import ms.asp.appointment.repository.BaseRepository;
 import ms.asp.appointment.repository.ServiceProviderRepository;
@@ -51,19 +51,27 @@ public class SlotService extends AbstractService<Slot, Long, SlotModel> {
 	this.availabilityService = availabilityService;
     }
 
-    public Flux<SlotModel> findAMSlots(Long serviceProviderId) {
-	return ((SlotRepository) repository).findByProviderAndStartBetween(serviceProviderId,
-		LocalTime.MIDNIGHT, LocalTime.NOON)
-		.flatMap(s -> findByPublicIdEager(s.getPublicId()))
+    public Flux<SlotModel> findAMSlotModels(Long serviceProviderId) {
+	return findAMSlots(serviceProviderId)
 		.map(mapper::toModel);
 
     }
 
-    public Flux<SlotModel> findPMSlots(Long serviceProviderId) {
+    protected Flux<Slot> findAMSlots(Long serviceProviderId) {
+	return ((SlotRepository) repository).findByProviderAndStartBetween(serviceProviderId,
+		LocalTime.MIDNIGHT, LocalTime.NOON)
+		.flatMap(s -> findByPublicIdEager(s.getPublicId()));
+    }
+
+    public Flux<SlotModel> findPMSlotModels(Long serviceProviderId) {
+	return findPMSlots(serviceProviderId)
+		.map(mapper::toModel);
+    }
+
+    protected Flux<Slot> findPMSlots(Long serviceProviderId) {
 	return ((SlotRepository) repository).findByProviderAndStartBetween(serviceProviderId,
 		LocalTime.NOON, LocalTime.MIDNIGHT)
-		.flatMap(s -> findByPublicIdEager(s.getPublicId()))
-		.map(mapper::toModel);
+		.flatMap(s -> findByPublicIdEager(s.getPublicId()));
     }
 
     protected Mono<Slot> create(Slot slot) {
@@ -104,8 +112,7 @@ public class SlotService extends AbstractService<Slot, Long, SlotModel> {
     public Mono<Slot> delete(Long id) {
 	return repository.findById(id)
 		.switchIfEmpty(Mono.error(NOT_FOUND))
-		.flatMap(s -> Mono.just(s.getAvailability())
-			.flatMapMany(Flux::fromIterable)
+		.flatMap(s -> availabilityRepository.findBySlotId(s.getId())
 			.flatMap(a -> availabilityRepository.delete(a))
 			.collectList()
 			.then(Mono.just(s)))

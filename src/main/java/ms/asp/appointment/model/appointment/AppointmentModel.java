@@ -1,4 +1,4 @@
-package ms.asp.appointment.model;
+package ms.asp.appointment.model.appointment;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,13 +13,16 @@ import ms.asp.appointment.domain.CancellationReason;
 import ms.asp.appointment.domain.Reason;
 import ms.asp.appointment.domain.ServiceCategory;
 import ms.asp.appointment.domain.Speciality;
+import ms.asp.appointment.model.BaseModel;
+import ms.asp.appointment.model.NoteModel;
+import ms.asp.appointment.model.PeriodModel;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class AppointmentModel extends BaseModel {
     private String status;
     private CancellationReason cancellationReason;
-    private AppointmentServiceProviderModel serviceProvider;
+    private ServiceProviderModel serviceProvider;
     private ServiceCategory serviceCategory;
     private Speciality speciality;
     private AppointmentType appointmentType;

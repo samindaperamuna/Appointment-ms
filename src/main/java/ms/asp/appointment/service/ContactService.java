@@ -52,7 +52,7 @@ public class ContactService extends AbstractService<Contact, Long, ContactModel>
     public Mono<Contact> delete(Long id) {
 	return repository.findById(id)
 		.switchIfEmpty(Mono.error(new NotFoundException("No contact found for that ID")))
-		.flatMap(a -> repository.delete(a).then(Mono.just(a)));
+		.flatMap(c -> repository.delete(c).then(Mono.just(c)));
     }
 
     private Mono<Contact> save(Contact contact, boolean update) {
